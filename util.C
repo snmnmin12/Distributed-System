@@ -44,3 +44,25 @@ void remove_from_room(room* r, int fd) {
 		}
 	}
 }
+
+void add_to_clients(client* cli) {
+
+	    for (int i = 0; i < MAX_CLIENTS; i++) {
+          if (!clients[i]) {
+              clients[i] = cli;
+              break;
+          }
+    }
+}
+void remove_from_clients(client* cli) {
+
+	for (int i = 0; i < MAX_CLIENTS; i++) {
+	      if (clients[i] == cli) {
+	          clients[i] = NULL;
+	          break;
+	        }
+	    }
+	    //send message in the server
+	    delete cli;
+	    cli = NULL;
+}

@@ -83,5 +83,6 @@ void send_all_message(char* s, client* cli);
 void add_to_room(room* r, int fd);
 void remove_from_room(room* r, int fd);
 
-
+void add_to_clients(client* cli);
+void remove_from_clients(client* cli);
 #endif

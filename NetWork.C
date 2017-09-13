@@ -120,8 +120,11 @@ void handleDelete(const char* roomname, client* cli, fd_set& master){
 	      if (clients[j] && clients[j]->proom == room_db[i]) {
 	          clients[j]->proom = NULL;
 	          FD_CLR(clients[j]->fd, &master);
+	          delete clients[j];
+	          clients[j] = NULL;
 	        }
 	    }
+
 
 		delete room_db[i];
 		pthread_detach(rooms_thread[i]);
@@ -281,7 +284,7 @@ void ClientConnection::createConnection(char * host, int portNo) {
                 	char *command;
                 	command = strtok(buffer," ");
                 	if (!strcmp(command,"\\QUIT")) {
-
+                		//send(listen_fd, buffer, BUFFER_LENGTH, 0);
                 		break;
                 	}
                 }
@@ -301,7 +304,7 @@ void ClientConnection::createConnection(char * host, int portNo) {
 
 void master_handle(client* cli, fd_set& master) {
 
-	//if (cli->proom != NULL) return;
+	if (cli->proom != NULL) return;
 
     char buffer1[BUFFER_LENGTH];
     char buffer2[BUFFER_LENGTH];
@@ -450,13 +453,10 @@ void MasterConnection::createConnection(char * host, int portNo, int backlog) {
    				cli->fd = sd2;
 			    cli->id = id++;
 			    cli->proom = NULL;
+
 			    sprintf(cli->name, "Guest%d", cli->id);
-			    for (int i = 0; i < MAX_CLIENTS; i++) {
-			          if (!clients[i]) {
-			              clients[i] = cli;
-			              break;
-			          }
-			    }
+			    add_to_clients(cli);
+
 		    	memset(buffer,0, sizeof(buffer));
 			    printf("<<Connected to server.\n");
 			    sprintf(buffer, "<<Welcome to the chat room server, %s, TYPE HELP for help\r\n", cli->name);
@@ -498,21 +498,13 @@ void room_handle(client* cli, fd_set& roomset) {
 
 	    close(cli->fd);
 	    FD_CLR(cli->fd, &roomset);
-	    remove_from_room(cli->proom, cli->fd);
 
 	    sprintf(buffer2, "%s has left this room!\r\n", cli->name);
 	    send_message(buffer2, cli);
 
-	    for (int i = 0; i < MAX_CLIENTS; i++) {
-	      if (clients[i] == cli) {
-	          clients[i] = NULL;
-	          break;
-	        }
-	    }
+	   	remove_from_room(cli->proom, cli->fd);
+	    remove_from_clients(cli);
 
-	    //send message in the server
-	    delete cli;
-	    cli = NULL;
 	    c_count--;
 	}
 }
@@ -541,7 +533,7 @@ void RoomConnection::createConnection(const char * host, room* r, int backlog) {
 		    return;
 		}
 
-	    // get room index in data base and save room fd;
+	    // get room index in data base and save the room fd;
 			for (int i = 0; i < MAX_ROOM; i++) {
 				if (room_db[i] && strcmp(room_db[i]->room_name, r->room_name) == 0) {
 					room_fd[i] = sd;
@@ -598,12 +590,8 @@ void RoomConnection::createConnection(const char * host, room* r, int backlog) {
 			    cli->id = id++;
 			    cli->proom = r;
 			    sprintf(cli->name, "Guest%d", cli->id);
-			    for (int i = 0; i < MAX_CLIENTS; i++) {
-			          if (!clients[i]) {
-			              clients[i] = cli;
-			              break;
-			          }
-			    }
+			    add_to_clients(cli);
+
 		    	add_to_room(r, cli->fd);
 		    	memset(buffer,0, sizeof(buffer));
 			    sprintf(buffer, "<<Welcome to room %s: %s and TYPE \\QUIT to exit!\r\n", r->room_name,cli->name);
