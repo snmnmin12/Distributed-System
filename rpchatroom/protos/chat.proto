@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+option java_package = "ex.grpc";
+
+package chatroom;
+
+// The greeting service definition.
+service ChatService {
+  // Sends a greeting
+  rpc SayHello (Request) returns (Response) {}
+  rpc join (JoinRequest) returns (Response);
+  rpc leave (LeaveRequest) returns (Response);
+  rpc send (SendRequest) returns (Response);
+  rpc sendAll (SendAllRequest) returns (Response);
+  rpc recvAll (RecvAllRequest) returns (ChatResponse);
+}
+
+// The request message containing the user's name.
+message Request {
+  string name = 1;
+  string message = 2;
+  int64 timestamp = 3;
+}
+
+// The response message containing the greetings
+message Response {
+  string message = 1;
+}
+
+message ChatResponse {
+	string status = 1;
+	string message = 2;
+	repeated Message chats = 3;
+}
+
+message Message {
+	string name = 1;
+	string room = 2;
+	string message = 3;
+	int64 timestamp = 4;
+}
+
+message JoinRequest {
+	string name = 1;
+	string room = 2;
+}
+
+message LeaveRequest {
+	string name = 1;
+	string room = 2;
+}
+
+message SendRequest {
+	string name = 1;
+	string room = 2;
+	string message = 3;
+}
+
+message SendAllRequest{
+	string name = 1;
+	string message = 2;
+}
+
+message RecvAllRequest{
+	string name = 1;
+}
