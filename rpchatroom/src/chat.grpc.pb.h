@@ -48,6 +48,10 @@ class ChatService final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::chatroom::Response>> Asyncleave(::grpc::ClientContext* context, const ::chatroom::LeaveRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::chatroom::Response>>(AsyncleaveRaw(context, request, cq));
     }
+    virtual ::grpc::Status list(::grpc::ClientContext* context, const ::chatroom::ListRequest& request, ::chatroom::Response* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::chatroom::Response>> Asynclist(::grpc::ClientContext* context, const ::chatroom::ListRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::chatroom::Response>>(AsynclistRaw(context, request, cq));
+    }
     virtual ::grpc::Status send(::grpc::ClientContext* context, const ::chatroom::SendRequest& request, ::chatroom::Response* response) = 0;
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::chatroom::Response>> Asyncsend(::grpc::ClientContext* context, const ::chatroom::SendRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::chatroom::Response>>(AsyncsendRaw(context, request, cq));
@@ -64,6 +68,7 @@ class ChatService final {
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::chatroom::Response>* AsyncSayHelloRaw(::grpc::ClientContext* context, const ::chatroom::Request& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::chatroom::Response>* AsyncjoinRaw(::grpc::ClientContext* context, const ::chatroom::JoinRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::chatroom::Response>* AsyncleaveRaw(::grpc::ClientContext* context, const ::chatroom::LeaveRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::chatroom::Response>* AsynclistRaw(::grpc::ClientContext* context, const ::chatroom::ListRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::chatroom::Response>* AsyncsendRaw(::grpc::ClientContext* context, const ::chatroom::SendRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::chatroom::Response>* AsyncsendAllRaw(::grpc::ClientContext* context, const ::chatroom::SendAllRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::chatroom::ChatResponse>* AsyncrecvAllRaw(::grpc::ClientContext* context, const ::chatroom::RecvAllRequest& request, ::grpc::CompletionQueue* cq) = 0;
@@ -83,6 +88,10 @@ class ChatService final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::chatroom::Response>> Asyncleave(::grpc::ClientContext* context, const ::chatroom::LeaveRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::chatroom::Response>>(AsyncleaveRaw(context, request, cq));
     }
+    ::grpc::Status list(::grpc::ClientContext* context, const ::chatroom::ListRequest& request, ::chatroom::Response* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::chatroom::Response>> Asynclist(::grpc::ClientContext* context, const ::chatroom::ListRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::chatroom::Response>>(AsynclistRaw(context, request, cq));
+    }
     ::grpc::Status send(::grpc::ClientContext* context, const ::chatroom::SendRequest& request, ::chatroom::Response* response) override;
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::chatroom::Response>> Asyncsend(::grpc::ClientContext* context, const ::chatroom::SendRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::chatroom::Response>>(AsyncsendRaw(context, request, cq));
@@ -101,12 +110,14 @@ class ChatService final {
     ::grpc::ClientAsyncResponseReader< ::chatroom::Response>* AsyncSayHelloRaw(::grpc::ClientContext* context, const ::chatroom::Request& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::chatroom::Response>* AsyncjoinRaw(::grpc::ClientContext* context, const ::chatroom::JoinRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::chatroom::Response>* AsyncleaveRaw(::grpc::ClientContext* context, const ::chatroom::LeaveRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::chatroom::Response>* AsynclistRaw(::grpc::ClientContext* context, const ::chatroom::ListRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::chatroom::Response>* AsyncsendRaw(::grpc::ClientContext* context, const ::chatroom::SendRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::chatroom::Response>* AsyncsendAllRaw(::grpc::ClientContext* context, const ::chatroom::SendAllRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::chatroom::ChatResponse>* AsyncrecvAllRaw(::grpc::ClientContext* context, const ::chatroom::RecvAllRequest& request, ::grpc::CompletionQueue* cq) override;
     const ::grpc::RpcMethod rpcmethod_SayHello_;
     const ::grpc::RpcMethod rpcmethod_join_;
     const ::grpc::RpcMethod rpcmethod_leave_;
+    const ::grpc::RpcMethod rpcmethod_list_;
     const ::grpc::RpcMethod rpcmethod_send_;
     const ::grpc::RpcMethod rpcmethod_sendAll_;
     const ::grpc::RpcMethod rpcmethod_recvAll_;
@@ -121,6 +132,7 @@ class ChatService final {
     virtual ::grpc::Status SayHello(::grpc::ServerContext* context, const ::chatroom::Request* request, ::chatroom::Response* response);
     virtual ::grpc::Status join(::grpc::ServerContext* context, const ::chatroom::JoinRequest* request, ::chatroom::Response* response);
     virtual ::grpc::Status leave(::grpc::ServerContext* context, const ::chatroom::LeaveRequest* request, ::chatroom::Response* response);
+    virtual ::grpc::Status list(::grpc::ServerContext* context, const ::chatroom::ListRequest* request, ::chatroom::Response* response);
     virtual ::grpc::Status send(::grpc::ServerContext* context, const ::chatroom::SendRequest* request, ::chatroom::Response* response);
     virtual ::grpc::Status sendAll(::grpc::ServerContext* context, const ::chatroom::SendAllRequest* request, ::chatroom::Response* response);
     virtual ::grpc::Status recvAll(::grpc::ServerContext* context, const ::chatroom::RecvAllRequest* request, ::chatroom::ChatResponse* response);
@@ -186,12 +198,32 @@ class ChatService final {
     }
   };
   template <class BaseClass>
+  class WithAsyncMethod_list : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service *service) {}
+   public:
+    WithAsyncMethod_list() {
+      ::grpc::Service::MarkMethodAsync(3);
+    }
+    ~WithAsyncMethod_list() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status list(::grpc::ServerContext* context, const ::chatroom::ListRequest* request, ::chatroom::Response* response) final override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void Requestlist(::grpc::ServerContext* context, ::chatroom::ListRequest* request, ::grpc::ServerAsyncResponseWriter< ::chatroom::Response>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(3, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
   class WithAsyncMethod_send : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service *service) {}
    public:
     WithAsyncMethod_send() {
-      ::grpc::Service::MarkMethodAsync(3);
+      ::grpc::Service::MarkMethodAsync(4);
     }
     ~WithAsyncMethod_send() override {
       BaseClassMustBeDerivedFromService(this);
@@ -202,7 +234,7 @@ class ChatService final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void Requestsend(::grpc::ServerContext* context, ::chatroom::SendRequest* request, ::grpc::ServerAsyncResponseWriter< ::chatroom::Response>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(3, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(4, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -211,7 +243,7 @@ class ChatService final {
     void BaseClassMustBeDerivedFromService(const Service *service) {}
    public:
     WithAsyncMethod_sendAll() {
-      ::grpc::Service::MarkMethodAsync(4);
+      ::grpc::Service::MarkMethodAsync(5);
     }
     ~WithAsyncMethod_sendAll() override {
       BaseClassMustBeDerivedFromService(this);
@@ -222,7 +254,7 @@ class ChatService final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestsendAll(::grpc::ServerContext* context, ::chatroom::SendAllRequest* request, ::grpc::ServerAsyncResponseWriter< ::chatroom::Response>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(4, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(5, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -231,7 +263,7 @@ class ChatService final {
     void BaseClassMustBeDerivedFromService(const Service *service) {}
    public:
     WithAsyncMethod_recvAll() {
-      ::grpc::Service::MarkMethodAsync(5);
+      ::grpc::Service::MarkMethodAsync(6);
     }
     ~WithAsyncMethod_recvAll() override {
       BaseClassMustBeDerivedFromService(this);
@@ -242,10 +274,10 @@ class ChatService final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestrecvAll(::grpc::ServerContext* context, ::chatroom::RecvAllRequest* request, ::grpc::ServerAsyncResponseWriter< ::chatroom::ChatResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(5, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(6, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
-  typedef WithAsyncMethod_SayHello<WithAsyncMethod_join<WithAsyncMethod_leave<WithAsyncMethod_send<WithAsyncMethod_sendAll<WithAsyncMethod_recvAll<Service > > > > > > AsyncService;
+  typedef WithAsyncMethod_SayHello<WithAsyncMethod_join<WithAsyncMethod_leave<WithAsyncMethod_list<WithAsyncMethod_send<WithAsyncMethod_sendAll<WithAsyncMethod_recvAll<Service > > > > > > > AsyncService;
   template <class BaseClass>
   class WithGenericMethod_SayHello : public BaseClass {
    private:
@@ -298,12 +330,29 @@ class ChatService final {
     }
   };
   template <class BaseClass>
+  class WithGenericMethod_list : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service *service) {}
+   public:
+    WithGenericMethod_list() {
+      ::grpc::Service::MarkMethodGeneric(3);
+    }
+    ~WithGenericMethod_list() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status list(::grpc::ServerContext* context, const ::chatroom::ListRequest* request, ::chatroom::Response* response) final override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
   class WithGenericMethod_send : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service *service) {}
    public:
     WithGenericMethod_send() {
-      ::grpc::Service::MarkMethodGeneric(3);
+      ::grpc::Service::MarkMethodGeneric(4);
     }
     ~WithGenericMethod_send() override {
       BaseClassMustBeDerivedFromService(this);
@@ -320,7 +369,7 @@ class ChatService final {
     void BaseClassMustBeDerivedFromService(const Service *service) {}
    public:
     WithGenericMethod_sendAll() {
-      ::grpc::Service::MarkMethodGeneric(4);
+      ::grpc::Service::MarkMethodGeneric(5);
     }
     ~WithGenericMethod_sendAll() override {
       BaseClassMustBeDerivedFromService(this);
@@ -337,7 +386,7 @@ class ChatService final {
     void BaseClassMustBeDerivedFromService(const Service *service) {}
    public:
     WithGenericMethod_recvAll() {
-      ::grpc::Service::MarkMethodGeneric(5);
+      ::grpc::Service::MarkMethodGeneric(6);
     }
     ~WithGenericMethod_recvAll() override {
       BaseClassMustBeDerivedFromService(this);
@@ -409,12 +458,32 @@ class ChatService final {
     virtual ::grpc::Status Streamedleave(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::chatroom::LeaveRequest,::chatroom::Response>* server_unary_streamer) = 0;
   };
   template <class BaseClass>
+  class WithStreamedUnaryMethod_list : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service *service) {}
+   public:
+    WithStreamedUnaryMethod_list() {
+      ::grpc::Service::MarkMethodStreamed(3,
+        new ::grpc::StreamedUnaryHandler< ::chatroom::ListRequest, ::chatroom::Response>(std::bind(&WithStreamedUnaryMethod_list<BaseClass>::Streamedlist, this, std::placeholders::_1, std::placeholders::_2)));
+    }
+    ~WithStreamedUnaryMethod_list() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status list(::grpc::ServerContext* context, const ::chatroom::ListRequest* request, ::chatroom::Response* response) final override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status Streamedlist(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::chatroom::ListRequest,::chatroom::Response>* server_unary_streamer) = 0;
+  };
+  template <class BaseClass>
   class WithStreamedUnaryMethod_send : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service *service) {}
    public:
     WithStreamedUnaryMethod_send() {
-      ::grpc::Service::MarkMethodStreamed(3,
+      ::grpc::Service::MarkMethodStreamed(4,
         new ::grpc::StreamedUnaryHandler< ::chatroom::SendRequest, ::chatroom::Response>(std::bind(&WithStreamedUnaryMethod_send<BaseClass>::Streamedsend, this, std::placeholders::_1, std::placeholders::_2)));
     }
     ~WithStreamedUnaryMethod_send() override {
@@ -434,7 +503,7 @@ class ChatService final {
     void BaseClassMustBeDerivedFromService(const Service *service) {}
    public:
     WithStreamedUnaryMethod_sendAll() {
-      ::grpc::Service::MarkMethodStreamed(4,
+      ::grpc::Service::MarkMethodStreamed(5,
         new ::grpc::StreamedUnaryHandler< ::chatroom::SendAllRequest, ::chatroom::Response>(std::bind(&WithStreamedUnaryMethod_sendAll<BaseClass>::StreamedsendAll, this, std::placeholders::_1, std::placeholders::_2)));
     }
     ~WithStreamedUnaryMethod_sendAll() override {
@@ -454,7 +523,7 @@ class ChatService final {
     void BaseClassMustBeDerivedFromService(const Service *service) {}
    public:
     WithStreamedUnaryMethod_recvAll() {
-      ::grpc::Service::MarkMethodStreamed(5,
+      ::grpc::Service::MarkMethodStreamed(6,
         new ::grpc::StreamedUnaryHandler< ::chatroom::RecvAllRequest, ::chatroom::ChatResponse>(std::bind(&WithStreamedUnaryMethod_recvAll<BaseClass>::StreamedrecvAll, this, std::placeholders::_1, std::placeholders::_2)));
     }
     ~WithStreamedUnaryMethod_recvAll() override {
@@ -468,9 +537,9 @@ class ChatService final {
     // replace default version of method with streamed unary
     virtual ::grpc::Status StreamedrecvAll(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::chatroom::RecvAllRequest,::chatroom::ChatResponse>* server_unary_streamer) = 0;
   };
-  typedef WithStreamedUnaryMethod_SayHello<WithStreamedUnaryMethod_join<WithStreamedUnaryMethod_leave<WithStreamedUnaryMethod_send<WithStreamedUnaryMethod_sendAll<WithStreamedUnaryMethod_recvAll<Service > > > > > > StreamedUnaryService;
+  typedef WithStreamedUnaryMethod_SayHello<WithStreamedUnaryMethod_join<WithStreamedUnaryMethod_leave<WithStreamedUnaryMethod_list<WithStreamedUnaryMethod_send<WithStreamedUnaryMethod_sendAll<WithStreamedUnaryMethod_recvAll<Service > > > > > > > StreamedUnaryService;
   typedef Service SplitStreamedService;
-  typedef WithStreamedUnaryMethod_SayHello<WithStreamedUnaryMethod_join<WithStreamedUnaryMethod_leave<WithStreamedUnaryMethod_send<WithStreamedUnaryMethod_sendAll<WithStreamedUnaryMethod_recvAll<Service > > > > > > StreamedService;
+  typedef WithStreamedUnaryMethod_SayHello<WithStreamedUnaryMethod_join<WithStreamedUnaryMethod_leave<WithStreamedUnaryMethod_list<WithStreamedUnaryMethod_send<WithStreamedUnaryMethod_sendAll<WithStreamedUnaryMethod_recvAll<Service > > > > > > > StreamedService;
 };
 
 }  // namespace chatroom

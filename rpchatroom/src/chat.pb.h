@@ -40,6 +40,9 @@ extern JoinRequestDefaultTypeInternal _JoinRequest_default_instance_;
 class LeaveRequest;
 class LeaveRequestDefaultTypeInternal;
 extern LeaveRequestDefaultTypeInternal _LeaveRequest_default_instance_;
+class ListRequest;
+class ListRequestDefaultTypeInternal;
+extern ListRequestDefaultTypeInternal _ListRequest_default_instance_;
 class Message;
 class MessageDefaultTypeInternal;
 extern MessageDefaultTypeInternal _Message_default_instance_;
@@ -706,6 +709,141 @@ class JoinRequest : public ::google::protobuf::Message /* @@protoc_insertion_poi
 };
 // -------------------------------------------------------------------
 
+class ListRequest : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:chatroom.ListRequest) */ {
+ public:
+  ListRequest();
+  virtual ~ListRequest();
+
+  ListRequest(const ListRequest& from);
+
+  inline ListRequest& operator=(const ListRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  #if LANG_CXX11
+  ListRequest(ListRequest&& from) noexcept
+    : ListRequest() {
+    *this = ::std::move(from);
+  }
+
+  inline ListRequest& operator=(ListRequest&& from) noexcept {
+    if (GetArenaNoVirtual() == from.GetArenaNoVirtual()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+  #endif
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ListRequest& default_instance();
+
+  static inline const ListRequest* internal_default_instance() {
+    return reinterpret_cast<const ListRequest*>(
+               &_ListRequest_default_instance_);
+  }
+  static PROTOBUF_CONSTEXPR int const kIndexInFileMessages =
+    5;
+
+  void Swap(ListRequest* other);
+  friend void swap(ListRequest& a, ListRequest& b) {
+    a.Swap(&b);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline ListRequest* New() const PROTOBUF_FINAL { return New(NULL); }
+
+  ListRequest* New(::google::protobuf::Arena* arena) const PROTOBUF_FINAL;
+  void CopyFrom(const ::google::protobuf::Message& from) PROTOBUF_FINAL;
+  void MergeFrom(const ::google::protobuf::Message& from) PROTOBUF_FINAL;
+  void CopyFrom(const ListRequest& from);
+  void MergeFrom(const ListRequest& from);
+  void Clear() PROTOBUF_FINAL;
+  bool IsInitialized() const PROTOBUF_FINAL;
+
+  size_t ByteSizeLong() const PROTOBUF_FINAL;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input) PROTOBUF_FINAL;
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const PROTOBUF_FINAL;
+  ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
+      bool deterministic, ::google::protobuf::uint8* target) const PROTOBUF_FINAL;
+  int GetCachedSize() const PROTOBUF_FINAL { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const PROTOBUF_FINAL;
+  void InternalSwap(ListRequest* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return NULL;
+  }
+  inline void* MaybeArenaPtr() const {
+    return NULL;
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const PROTOBUF_FINAL;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // string name = 1;
+  void clear_name();
+  static const int kNameFieldNumber = 1;
+  const ::std::string& name() const;
+  void set_name(const ::std::string& value);
+  #if LANG_CXX11
+  void set_name(::std::string&& value);
+  #endif
+  void set_name(const char* value);
+  void set_name(const char* value, size_t size);
+  ::std::string* mutable_name();
+  ::std::string* release_name();
+  void set_allocated_name(::std::string* name);
+
+  // string allrooms = 2;
+  void clear_allrooms();
+  static const int kAllroomsFieldNumber = 2;
+  const ::std::string& allrooms() const;
+  void set_allrooms(const ::std::string& value);
+  #if LANG_CXX11
+  void set_allrooms(::std::string&& value);
+  #endif
+  void set_allrooms(const char* value);
+  void set_allrooms(const char* value, size_t size);
+  ::std::string* mutable_allrooms();
+  ::std::string* release_allrooms();
+  void set_allocated_allrooms(::std::string* allrooms);
+
+  // string avail_rooms = 3;
+  void clear_avail_rooms();
+  static const int kAvailRoomsFieldNumber = 3;
+  const ::std::string& avail_rooms() const;
+  void set_avail_rooms(const ::std::string& value);
+  #if LANG_CXX11
+  void set_avail_rooms(::std::string&& value);
+  #endif
+  void set_avail_rooms(const char* value);
+  void set_avail_rooms(const char* value, size_t size);
+  ::std::string* mutable_avail_rooms();
+  ::std::string* release_avail_rooms();
+  void set_allocated_avail_rooms(::std::string* avail_rooms);
+
+  // @@protoc_insertion_point(class_scope:chatroom.ListRequest)
+ private:
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  ::google::protobuf::internal::ArenaStringPtr name_;
+  ::google::protobuf::internal::ArenaStringPtr allrooms_;
+  ::google::protobuf::internal::ArenaStringPtr avail_rooms_;
+  mutable int _cached_size_;
+  friend struct protobuf_chat_2eproto::TableStruct;
+};
+// -------------------------------------------------------------------
+
 class LeaveRequest : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:chatroom.LeaveRequest) */ {
  public:
   LeaveRequest();
@@ -740,7 +878,7 @@ class LeaveRequest : public ::google::protobuf::Message /* @@protoc_insertion_po
                &_LeaveRequest_default_instance_);
   }
   static PROTOBUF_CONSTEXPR int const kIndexInFileMessages =
-    5;
+    6;
 
   void Swap(LeaveRequest* other);
   friend void swap(LeaveRequest& a, LeaveRequest& b) {
@@ -860,7 +998,7 @@ class SendRequest : public ::google::protobuf::Message /* @@protoc_insertion_poi
                &_SendRequest_default_instance_);
   }
   static PROTOBUF_CONSTEXPR int const kIndexInFileMessages =
-    6;
+    7;
 
   void Swap(SendRequest* other);
   friend void swap(SendRequest& a, SendRequest& b) {
@@ -995,7 +1133,7 @@ class SendAllRequest : public ::google::protobuf::Message /* @@protoc_insertion_
                &_SendAllRequest_default_instance_);
   }
   static PROTOBUF_CONSTEXPR int const kIndexInFileMessages =
-    7;
+    8;
 
   void Swap(SendAllRequest* other);
   friend void swap(SendAllRequest& a, SendAllRequest& b) {
@@ -1115,7 +1253,7 @@ class RecvAllRequest : public ::google::protobuf::Message /* @@protoc_insertion_
                &_RecvAllRequest_default_instance_);
   }
   static PROTOBUF_CONSTEXPR int const kIndexInFileMessages =
-    8;
+    9;
 
   void Swap(RecvAllRequest* other);
   friend void swap(RecvAllRequest& a, RecvAllRequest& b) {
@@ -1802,6 +1940,169 @@ inline void JoinRequest::set_allocated_room(::std::string* room) {
 
 // -------------------------------------------------------------------
 
+// ListRequest
+
+// string name = 1;
+inline void ListRequest::clear_name() {
+  name_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline const ::std::string& ListRequest::name() const {
+  // @@protoc_insertion_point(field_get:chatroom.ListRequest.name)
+  return name_.GetNoArena();
+}
+inline void ListRequest::set_name(const ::std::string& value) {
+  
+  name_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:chatroom.ListRequest.name)
+}
+#if LANG_CXX11
+inline void ListRequest::set_name(::std::string&& value) {
+  
+  name_.SetNoArena(
+    &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
+  // @@protoc_insertion_point(field_set_rvalue:chatroom.ListRequest.name)
+}
+#endif
+inline void ListRequest::set_name(const char* value) {
+  GOOGLE_DCHECK(value != NULL);
+  
+  name_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:chatroom.ListRequest.name)
+}
+inline void ListRequest::set_name(const char* value, size_t size) {
+  
+  name_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:chatroom.ListRequest.name)
+}
+inline ::std::string* ListRequest::mutable_name() {
+  
+  // @@protoc_insertion_point(field_mutable:chatroom.ListRequest.name)
+  return name_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline ::std::string* ListRequest::release_name() {
+  // @@protoc_insertion_point(field_release:chatroom.ListRequest.name)
+  
+  return name_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void ListRequest::set_allocated_name(::std::string* name) {
+  if (name != NULL) {
+    
+  } else {
+    
+  }
+  name_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), name);
+  // @@protoc_insertion_point(field_set_allocated:chatroom.ListRequest.name)
+}
+
+// string allrooms = 2;
+inline void ListRequest::clear_allrooms() {
+  allrooms_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline const ::std::string& ListRequest::allrooms() const {
+  // @@protoc_insertion_point(field_get:chatroom.ListRequest.allrooms)
+  return allrooms_.GetNoArena();
+}
+inline void ListRequest::set_allrooms(const ::std::string& value) {
+  
+  allrooms_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:chatroom.ListRequest.allrooms)
+}
+#if LANG_CXX11
+inline void ListRequest::set_allrooms(::std::string&& value) {
+  
+  allrooms_.SetNoArena(
+    &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
+  // @@protoc_insertion_point(field_set_rvalue:chatroom.ListRequest.allrooms)
+}
+#endif
+inline void ListRequest::set_allrooms(const char* value) {
+  GOOGLE_DCHECK(value != NULL);
+  
+  allrooms_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:chatroom.ListRequest.allrooms)
+}
+inline void ListRequest::set_allrooms(const char* value, size_t size) {
+  
+  allrooms_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:chatroom.ListRequest.allrooms)
+}
+inline ::std::string* ListRequest::mutable_allrooms() {
+  
+  // @@protoc_insertion_point(field_mutable:chatroom.ListRequest.allrooms)
+  return allrooms_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline ::std::string* ListRequest::release_allrooms() {
+  // @@protoc_insertion_point(field_release:chatroom.ListRequest.allrooms)
+  
+  return allrooms_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void ListRequest::set_allocated_allrooms(::std::string* allrooms) {
+  if (allrooms != NULL) {
+    
+  } else {
+    
+  }
+  allrooms_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), allrooms);
+  // @@protoc_insertion_point(field_set_allocated:chatroom.ListRequest.allrooms)
+}
+
+// string avail_rooms = 3;
+inline void ListRequest::clear_avail_rooms() {
+  avail_rooms_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline const ::std::string& ListRequest::avail_rooms() const {
+  // @@protoc_insertion_point(field_get:chatroom.ListRequest.avail_rooms)
+  return avail_rooms_.GetNoArena();
+}
+inline void ListRequest::set_avail_rooms(const ::std::string& value) {
+  
+  avail_rooms_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:chatroom.ListRequest.avail_rooms)
+}
+#if LANG_CXX11
+inline void ListRequest::set_avail_rooms(::std::string&& value) {
+  
+  avail_rooms_.SetNoArena(
+    &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
+  // @@protoc_insertion_point(field_set_rvalue:chatroom.ListRequest.avail_rooms)
+}
+#endif
+inline void ListRequest::set_avail_rooms(const char* value) {
+  GOOGLE_DCHECK(value != NULL);
+  
+  avail_rooms_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:chatroom.ListRequest.avail_rooms)
+}
+inline void ListRequest::set_avail_rooms(const char* value, size_t size) {
+  
+  avail_rooms_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:chatroom.ListRequest.avail_rooms)
+}
+inline ::std::string* ListRequest::mutable_avail_rooms() {
+  
+  // @@protoc_insertion_point(field_mutable:chatroom.ListRequest.avail_rooms)
+  return avail_rooms_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline ::std::string* ListRequest::release_avail_rooms() {
+  // @@protoc_insertion_point(field_release:chatroom.ListRequest.avail_rooms)
+  
+  return avail_rooms_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void ListRequest::set_allocated_avail_rooms(::std::string* avail_rooms) {
+  if (avail_rooms != NULL) {
+    
+  } else {
+    
+  }
+  avail_rooms_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), avail_rooms);
+  // @@protoc_insertion_point(field_set_allocated:chatroom.ListRequest.avail_rooms)
+}
+
+// -------------------------------------------------------------------
+
 // LeaveRequest
 
 // string name = 1;
@@ -2244,6 +2545,8 @@ inline void RecvAllRequest::set_allocated_name(::std::string* name) {
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
 #endif  // !PROTOBUF_INLINE_NOT_IN_HEADERS
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

@@ -43,6 +43,11 @@ public:
  ::google::protobuf::internal::ExplicitlyConstructed<JoinRequest>
      _instance;
 } _JoinRequest_default_instance_;
+class ListRequestDefaultTypeInternal {
+public:
+ ::google::protobuf::internal::ExplicitlyConstructed<ListRequest>
+     _instance;
+} _ListRequest_default_instance_;
 class LeaveRequestDefaultTypeInternal {
 public:
  ::google::protobuf::internal::ExplicitlyConstructed<LeaveRequest>
@@ -69,7 +74,7 @@ namespace protobuf_chat_2eproto {
 
 namespace {
 
-::google::protobuf::Metadata file_level_metadata[9];
+::google::protobuf::Metadata file_level_metadata[10];
 
 }  // namespace
 
@@ -84,6 +89,7 @@ PROTOBUF_CONSTEXPR_VAR ::google::protobuf::internal::AuxillaryParseTableField
 };
 PROTOBUF_CONSTEXPR_VAR ::google::protobuf::internal::ParseTable const
     TableStruct::schema[] GOOGLE_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
+  { NULL, NULL, 0, -1, -1, -1, -1, NULL, false },
   { NULL, NULL, 0, -1, -1, -1, -1, NULL, false },
   { NULL, NULL, 0, -1, -1, -1, -1, NULL, false },
   { NULL, NULL, 0, -1, -1, -1, -1, NULL, false },
@@ -135,6 +141,14 @@ const ::google::protobuf::uint32 TableStruct::offsets[] GOOGLE_ATTRIBUTE_SECTION
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(JoinRequest, name_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(JoinRequest, room_),
   ~0u,  // no _has_bits_
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ListRequest, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ListRequest, name_),
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ListRequest, allrooms_),
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ListRequest, avail_rooms_),
+  ~0u,  // no _has_bits_
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LeaveRequest, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
@@ -169,10 +183,11 @@ static const ::google::protobuf::internal::MigrationSchema schemas[] GOOGLE_ATTR
   { 14, -1, sizeof(ChatResponse)},
   { 22, -1, sizeof(Message)},
   { 31, -1, sizeof(JoinRequest)},
-  { 38, -1, sizeof(LeaveRequest)},
-  { 45, -1, sizeof(SendRequest)},
-  { 53, -1, sizeof(SendAllRequest)},
-  { 60, -1, sizeof(RecvAllRequest)},
+  { 38, -1, sizeof(ListRequest)},
+  { 46, -1, sizeof(LeaveRequest)},
+  { 53, -1, sizeof(SendRequest)},
+  { 61, -1, sizeof(SendAllRequest)},
+  { 68, -1, sizeof(RecvAllRequest)},
 };
 
 static ::google::protobuf::Message const * const file_default_instances[] = {
@@ -181,6 +196,7 @@ static ::google::protobuf::Message const * const file_default_instances[] = {
   reinterpret_cast<const ::google::protobuf::Message*>(&_ChatResponse_default_instance_),
   reinterpret_cast<const ::google::protobuf::Message*>(&_Message_default_instance_),
   reinterpret_cast<const ::google::protobuf::Message*>(&_JoinRequest_default_instance_),
+  reinterpret_cast<const ::google::protobuf::Message*>(&_ListRequest_default_instance_),
   reinterpret_cast<const ::google::protobuf::Message*>(&_LeaveRequest_default_instance_),
   reinterpret_cast<const ::google::protobuf::Message*>(&_SendRequest_default_instance_),
   reinterpret_cast<const ::google::protobuf::Message*>(&_SendAllRequest_default_instance_),
@@ -205,7 +221,7 @@ void protobuf_AssignDescriptorsOnce() {
 void protobuf_RegisterTypes(const ::std::string&) GOOGLE_ATTRIBUTE_COLD;
 void protobuf_RegisterTypes(const ::std::string&) {
   protobuf_AssignDescriptorsOnce();
-  ::google::protobuf::internal::RegisterAllTypes(file_level_metadata, 9);
+  ::google::protobuf::internal::RegisterAllTypes(file_level_metadata, 10);
 }
 
 }  // namespace
@@ -223,7 +239,9 @@ void TableStruct::InitDefaultsImpl() {
   ::google::protobuf::internal::OnShutdownDestroyMessage(
       &_Message_default_instance_);_JoinRequest_default_instance_._instance.DefaultConstruct();
   ::google::protobuf::internal::OnShutdownDestroyMessage(
-      &_JoinRequest_default_instance_);_LeaveRequest_default_instance_._instance.DefaultConstruct();
+      &_JoinRequest_default_instance_);_ListRequest_default_instance_._instance.DefaultConstruct();
+  ::google::protobuf::internal::OnShutdownDestroyMessage(
+      &_ListRequest_default_instance_);_LeaveRequest_default_instance_._instance.DefaultConstruct();
   ::google::protobuf::internal::OnShutdownDestroyMessage(
       &_LeaveRequest_default_instance_);_SendRequest_default_instance_._instance.DefaultConstruct();
   ::google::protobuf::internal::OnShutdownDestroyMessage(
@@ -248,24 +266,27 @@ void AddDescriptorsImpl() {
       "\t\022 \n\005chats\030\003 \003(\0132\021.chatroom.Message\"I\n\007M"
       "essage\022\014\n\004name\030\001 \001(\t\022\014\n\004room\030\002 \001(\t\022\017\n\007me"
       "ssage\030\003 \001(\t\022\021\n\ttimestamp\030\004 \001(\003\")\n\013JoinRe"
-      "quest\022\014\n\004name\030\001 \001(\t\022\014\n\004room\030\002 \001(\t\"*\n\014Lea"
-      "veRequest\022\014\n\004name\030\001 \001(\t\022\014\n\004room\030\002 \001(\t\":\n"
-      "\013SendRequest\022\014\n\004name\030\001 \001(\t\022\014\n\004room\030\002 \001(\t"
-      "\022\017\n\007message\030\003 \001(\t\"/\n\016SendAllRequest\022\014\n\004n"
-      "ame\030\001 \001(\t\022\017\n\007message\030\002 \001(\t\"\036\n\016RecvAllReq"
-      "uest\022\014\n\004name\030\001 \001(\t2\323\002\n\013ChatService\0223\n\010Sa"
-      "yHello\022\021.chatroom.Request\032\022.chatroom.Res"
-      "ponse\"\000\0221\n\004join\022\025.chatroom.JoinRequest\032\022"
-      ".chatroom.Response\0223\n\005leave\022\026.chatroom.L"
-      "eaveRequest\032\022.chatroom.Response\0221\n\004send\022"
-      "\025.chatroom.SendRequest\032\022.chatroom.Respon"
-      "se\0227\n\007sendAll\022\030.chatroom.SendAllRequest\032"
-      "\022.chatroom.Response\022;\n\007recvAll\022\030.chatroo"
-      "m.RecvAllRequest\032\026.chatroom.ChatResponse"
-      "B\t\n\007ex.grpcb\006proto3"
+      "quest\022\014\n\004name\030\001 \001(\t\022\014\n\004room\030\002 \001(\t\"B\n\013Lis"
+      "tRequest\022\014\n\004name\030\001 \001(\t\022\020\n\010allrooms\030\002 \001(\t"
+      "\022\023\n\013avail_rooms\030\003 \001(\t\"*\n\014LeaveRequest\022\014\n"
+      "\004name\030\001 \001(\t\022\014\n\004room\030\002 \001(\t\":\n\013SendRequest"
+      "\022\014\n\004name\030\001 \001(\t\022\014\n\004room\030\002 \001(\t\022\017\n\007message\030"
+      "\003 \001(\t\"/\n\016SendAllRequest\022\014\n\004name\030\001 \001(\t\022\017\n"
+      "\007message\030\002 \001(\t\"\036\n\016RecvAllRequest\022\014\n\004name"
+      "\030\001 \001(\t2\206\003\n\013ChatService\0223\n\010SayHello\022\021.cha"
+      "troom.Request\032\022.chatroom.Response\"\000\0221\n\004j"
+      "oin\022\025.chatroom.JoinRequest\032\022.chatroom.Re"
+      "sponse\0223\n\005leave\022\026.chatroom.LeaveRequest\032"
+      "\022.chatroom.Response\0221\n\004list\022\025.chatroom.L"
+      "istRequest\032\022.chatroom.Response\0221\n\004send\022\025"
+      ".chatroom.SendRequest\032\022.chatroom.Respons"
+      "e\0227\n\007sendAll\022\030.chatroom.SendAllRequest\032\022"
+      ".chatroom.Response\022;\n\007recvAll\022\030.chatroom"
+      ".RecvAllRequest\032\026.chatroom.ChatResponseB"
+      "\t\n\007ex.grpcb\006proto3"
   };
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-      descriptor, 859);
+      descriptor, 978);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "chat.proto", &protobuf_RegisterTypes);
 }
@@ -2565,6 +2586,537 @@ void JoinRequest::set_allocated_room(::std::string* room) {
   }
   room_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), room);
   // @@protoc_insertion_point(field_set_allocated:chatroom.JoinRequest.room)
+}
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
+
+// ===================================================================
+
+#if !defined(_MSC_VER) || _MSC_VER >= 1900
+const int ListRequest::kNameFieldNumber;
+const int ListRequest::kAllroomsFieldNumber;
+const int ListRequest::kAvailRoomsFieldNumber;
+#endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
+
+ListRequest::ListRequest()
+  : ::google::protobuf::Message(), _internal_metadata_(NULL) {
+  if (GOOGLE_PREDICT_TRUE(this != internal_default_instance())) {
+    protobuf_chat_2eproto::InitDefaults();
+  }
+  SharedCtor();
+  // @@protoc_insertion_point(constructor:chatroom.ListRequest)
+}
+ListRequest::ListRequest(const ListRequest& from)
+  : ::google::protobuf::Message(),
+      _internal_metadata_(NULL),
+      _cached_size_(0) {
+  _internal_metadata_.MergeFrom(from._internal_metadata_);
+  name_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  if (from.name().size() > 0) {
+    name_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.name_);
+  }
+  allrooms_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  if (from.allrooms().size() > 0) {
+    allrooms_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.allrooms_);
+  }
+  avail_rooms_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  if (from.avail_rooms().size() > 0) {
+    avail_rooms_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.avail_rooms_);
+  }
+  // @@protoc_insertion_point(copy_constructor:chatroom.ListRequest)
+}
+
+void ListRequest::SharedCtor() {
+  name_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  allrooms_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  avail_rooms_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  _cached_size_ = 0;
+}
+
+ListRequest::~ListRequest() {
+  // @@protoc_insertion_point(destructor:chatroom.ListRequest)
+  SharedDtor();
+}
+
+void ListRequest::SharedDtor() {
+  name_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  allrooms_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  avail_rooms_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+
+void ListRequest::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* ListRequest::descriptor() {
+  protobuf_chat_2eproto::protobuf_AssignDescriptorsOnce();
+  return protobuf_chat_2eproto::file_level_metadata[kIndexInFileMessages].descriptor;
+}
+
+const ListRequest& ListRequest::default_instance() {
+  protobuf_chat_2eproto::InitDefaults();
+  return *internal_default_instance();
+}
+
+ListRequest* ListRequest::New(::google::protobuf::Arena* arena) const {
+  ListRequest* n = new ListRequest;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
+}
+
+void ListRequest::Clear() {
+// @@protoc_insertion_point(message_clear_start:chatroom.ListRequest)
+  ::google::protobuf::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  name_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  allrooms_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  avail_rooms_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  _internal_metadata_.Clear();
+}
+
+bool ListRequest::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!GOOGLE_PREDICT_TRUE(EXPRESSION)) goto failure
+  ::google::protobuf::uint32 tag;
+  // @@protoc_insertion_point(parse_start:chatroom.ListRequest)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoffNoLastTag(127u);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // string name = 1;
+      case 1: {
+        if (static_cast< ::google::protobuf::uint8>(tag) ==
+            static_cast< ::google::protobuf::uint8>(10u /* 10 & 0xFF */)) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_name()));
+          DO_(::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+            this->name().data(), static_cast<int>(this->name().length()),
+            ::google::protobuf::internal::WireFormatLite::PARSE,
+            "chatroom.ListRequest.name"));
+        } else {
+          goto handle_unusual;
+        }
+        break;
+      }
+
+      // string allrooms = 2;
+      case 2: {
+        if (static_cast< ::google::protobuf::uint8>(tag) ==
+            static_cast< ::google::protobuf::uint8>(18u /* 18 & 0xFF */)) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_allrooms()));
+          DO_(::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+            this->allrooms().data(), static_cast<int>(this->allrooms().length()),
+            ::google::protobuf::internal::WireFormatLite::PARSE,
+            "chatroom.ListRequest.allrooms"));
+        } else {
+          goto handle_unusual;
+        }
+        break;
+      }
+
+      // string avail_rooms = 3;
+      case 3: {
+        if (static_cast< ::google::protobuf::uint8>(tag) ==
+            static_cast< ::google::protobuf::uint8>(26u /* 26 & 0xFF */)) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_avail_rooms()));
+          DO_(::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+            this->avail_rooms().data(), static_cast<int>(this->avail_rooms().length()),
+            ::google::protobuf::internal::WireFormatLite::PARSE,
+            "chatroom.ListRequest.avail_rooms"));
+        } else {
+          goto handle_unusual;
+        }
+        break;
+      }
+
+      default: {
+      handle_unusual:
+        if (tag == 0) {
+          goto success;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, _internal_metadata_.mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+success:
+  // @@protoc_insertion_point(parse_success:chatroom.ListRequest)
+  return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:chatroom.ListRequest)
+  return false;
+#undef DO_
+}
+
+void ListRequest::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:chatroom.ListRequest)
+  ::google::protobuf::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // string name = 1;
+  if (this->name().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->name().data(), static_cast<int>(this->name().length()),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "chatroom.ListRequest.name");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      1, this->name(), output);
+  }
+
+  // string allrooms = 2;
+  if (this->allrooms().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->allrooms().data(), static_cast<int>(this->allrooms().length()),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "chatroom.ListRequest.allrooms");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      2, this->allrooms(), output);
+  }
+
+  // string avail_rooms = 3;
+  if (this->avail_rooms().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->avail_rooms().data(), static_cast<int>(this->avail_rooms().length()),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "chatroom.ListRequest.avail_rooms");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      3, this->avail_rooms(), output);
+  }
+
+  if ((_internal_metadata_.have_unknown_fields() &&  ::google::protobuf::internal::GetProto3PreserveUnknownsDefault())) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        (::google::protobuf::internal::GetProto3PreserveUnknownsDefault()   ? _internal_metadata_.unknown_fields()   : _internal_metadata_.default_instance()), output);
+  }
+  // @@protoc_insertion_point(serialize_end:chatroom.ListRequest)
+}
+
+::google::protobuf::uint8* ListRequest::InternalSerializeWithCachedSizesToArray(
+    bool deterministic, ::google::protobuf::uint8* target) const {
+  (void)deterministic; // Unused
+  // @@protoc_insertion_point(serialize_to_array_start:chatroom.ListRequest)
+  ::google::protobuf::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // string name = 1;
+  if (this->name().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->name().data(), static_cast<int>(this->name().length()),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "chatroom.ListRequest.name");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        1, this->name(), target);
+  }
+
+  // string allrooms = 2;
+  if (this->allrooms().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->allrooms().data(), static_cast<int>(this->allrooms().length()),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "chatroom.ListRequest.allrooms");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        2, this->allrooms(), target);
+  }
+
+  // string avail_rooms = 3;
+  if (this->avail_rooms().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->avail_rooms().data(), static_cast<int>(this->avail_rooms().length()),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "chatroom.ListRequest.avail_rooms");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        3, this->avail_rooms(), target);
+  }
+
+  if ((_internal_metadata_.have_unknown_fields() &&  ::google::protobuf::internal::GetProto3PreserveUnknownsDefault())) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        (::google::protobuf::internal::GetProto3PreserveUnknownsDefault()   ? _internal_metadata_.unknown_fields()   : _internal_metadata_.default_instance()), target);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:chatroom.ListRequest)
+  return target;
+}
+
+size_t ListRequest::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:chatroom.ListRequest)
+  size_t total_size = 0;
+
+  if ((_internal_metadata_.have_unknown_fields() &&  ::google::protobuf::internal::GetProto3PreserveUnknownsDefault())) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        (::google::protobuf::internal::GetProto3PreserveUnknownsDefault()   ? _internal_metadata_.unknown_fields()   : _internal_metadata_.default_instance()));
+  }
+  // string name = 1;
+  if (this->name().size() > 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::StringSize(
+        this->name());
+  }
+
+  // string allrooms = 2;
+  if (this->allrooms().size() > 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::StringSize(
+        this->allrooms());
+  }
+
+  // string avail_rooms = 3;
+  if (this->avail_rooms().size() > 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::StringSize(
+        this->avail_rooms());
+  }
+
+  int cached_size = ::google::protobuf::internal::ToCachedSize(total_size);
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = cached_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void ListRequest::MergeFrom(const ::google::protobuf::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:chatroom.ListRequest)
+  GOOGLE_DCHECK_NE(&from, this);
+  const ListRequest* source =
+      ::google::protobuf::internal::DynamicCastToGenerated<const ListRequest>(
+          &from);
+  if (source == NULL) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:chatroom.ListRequest)
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:chatroom.ListRequest)
+    MergeFrom(*source);
+  }
+}
+
+void ListRequest::MergeFrom(const ListRequest& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:chatroom.ListRequest)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom(from._internal_metadata_);
+  ::google::protobuf::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from.name().size() > 0) {
+
+    name_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.name_);
+  }
+  if (from.allrooms().size() > 0) {
+
+    allrooms_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.allrooms_);
+  }
+  if (from.avail_rooms().size() > 0) {
+
+    avail_rooms_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.avail_rooms_);
+  }
+}
+
+void ListRequest::CopyFrom(const ::google::protobuf::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:chatroom.ListRequest)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void ListRequest::CopyFrom(const ListRequest& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:chatroom.ListRequest)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool ListRequest::IsInitialized() const {
+  return true;
+}
+
+void ListRequest::Swap(ListRequest* other) {
+  if (other == this) return;
+  InternalSwap(other);
+}
+void ListRequest::InternalSwap(ListRequest* other) {
+  using std::swap;
+  name_.Swap(&other->name_);
+  allrooms_.Swap(&other->allrooms_);
+  avail_rooms_.Swap(&other->avail_rooms_);
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  swap(_cached_size_, other->_cached_size_);
+}
+
+::google::protobuf::Metadata ListRequest::GetMetadata() const {
+  protobuf_chat_2eproto::protobuf_AssignDescriptorsOnce();
+  return protobuf_chat_2eproto::file_level_metadata[kIndexInFileMessages];
+}
+
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// ListRequest
+
+// string name = 1;
+void ListRequest::clear_name() {
+  name_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+const ::std::string& ListRequest::name() const {
+  // @@protoc_insertion_point(field_get:chatroom.ListRequest.name)
+  return name_.GetNoArena();
+}
+void ListRequest::set_name(const ::std::string& value) {
+  
+  name_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:chatroom.ListRequest.name)
+}
+#if LANG_CXX11
+void ListRequest::set_name(::std::string&& value) {
+  
+  name_.SetNoArena(
+    &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
+  // @@protoc_insertion_point(field_set_rvalue:chatroom.ListRequest.name)
+}
+#endif
+void ListRequest::set_name(const char* value) {
+  GOOGLE_DCHECK(value != NULL);
+  
+  name_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:chatroom.ListRequest.name)
+}
+void ListRequest::set_name(const char* value, size_t size) {
+  
+  name_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:chatroom.ListRequest.name)
+}
+::std::string* ListRequest::mutable_name() {
+  
+  // @@protoc_insertion_point(field_mutable:chatroom.ListRequest.name)
+  return name_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+::std::string* ListRequest::release_name() {
+  // @@protoc_insertion_point(field_release:chatroom.ListRequest.name)
+  
+  return name_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+void ListRequest::set_allocated_name(::std::string* name) {
+  if (name != NULL) {
+    
+  } else {
+    
+  }
+  name_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), name);
+  // @@protoc_insertion_point(field_set_allocated:chatroom.ListRequest.name)
+}
+
+// string allrooms = 2;
+void ListRequest::clear_allrooms() {
+  allrooms_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+const ::std::string& ListRequest::allrooms() const {
+  // @@protoc_insertion_point(field_get:chatroom.ListRequest.allrooms)
+  return allrooms_.GetNoArena();
+}
+void ListRequest::set_allrooms(const ::std::string& value) {
+  
+  allrooms_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:chatroom.ListRequest.allrooms)
+}
+#if LANG_CXX11
+void ListRequest::set_allrooms(::std::string&& value) {
+  
+  allrooms_.SetNoArena(
+    &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
+  // @@protoc_insertion_point(field_set_rvalue:chatroom.ListRequest.allrooms)
+}
+#endif
+void ListRequest::set_allrooms(const char* value) {
+  GOOGLE_DCHECK(value != NULL);
+  
+  allrooms_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:chatroom.ListRequest.allrooms)
+}
+void ListRequest::set_allrooms(const char* value, size_t size) {
+  
+  allrooms_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:chatroom.ListRequest.allrooms)
+}
+::std::string* ListRequest::mutable_allrooms() {
+  
+  // @@protoc_insertion_point(field_mutable:chatroom.ListRequest.allrooms)
+  return allrooms_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+::std::string* ListRequest::release_allrooms() {
+  // @@protoc_insertion_point(field_release:chatroom.ListRequest.allrooms)
+  
+  return allrooms_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+void ListRequest::set_allocated_allrooms(::std::string* allrooms) {
+  if (allrooms != NULL) {
+    
+  } else {
+    
+  }
+  allrooms_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), allrooms);
+  // @@protoc_insertion_point(field_set_allocated:chatroom.ListRequest.allrooms)
+}
+
+// string avail_rooms = 3;
+void ListRequest::clear_avail_rooms() {
+  avail_rooms_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+const ::std::string& ListRequest::avail_rooms() const {
+  // @@protoc_insertion_point(field_get:chatroom.ListRequest.avail_rooms)
+  return avail_rooms_.GetNoArena();
+}
+void ListRequest::set_avail_rooms(const ::std::string& value) {
+  
+  avail_rooms_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:chatroom.ListRequest.avail_rooms)
+}
+#if LANG_CXX11
+void ListRequest::set_avail_rooms(::std::string&& value) {
+  
+  avail_rooms_.SetNoArena(
+    &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
+  // @@protoc_insertion_point(field_set_rvalue:chatroom.ListRequest.avail_rooms)
+}
+#endif
+void ListRequest::set_avail_rooms(const char* value) {
+  GOOGLE_DCHECK(value != NULL);
+  
+  avail_rooms_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:chatroom.ListRequest.avail_rooms)
+}
+void ListRequest::set_avail_rooms(const char* value, size_t size) {
+  
+  avail_rooms_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:chatroom.ListRequest.avail_rooms)
+}
+::std::string* ListRequest::mutable_avail_rooms() {
+  
+  // @@protoc_insertion_point(field_mutable:chatroom.ListRequest.avail_rooms)
+  return avail_rooms_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+::std::string* ListRequest::release_avail_rooms() {
+  // @@protoc_insertion_point(field_release:chatroom.ListRequest.avail_rooms)
+  
+  return avail_rooms_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+void ListRequest::set_allocated_avail_rooms(::std::string* avail_rooms) {
+  if (avail_rooms != NULL) {
+    
+  } else {
+    
+  }
+  avail_rooms_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), avail_rooms);
+  // @@protoc_insertion_point(field_set_allocated:chatroom.ListRequest.avail_rooms)
 }
 
 #endif  // PROTOBUF_INLINE_NOT_IN_HEADERS

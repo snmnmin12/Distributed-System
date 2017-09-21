@@ -13,24 +13,6 @@ using chatroom::Request;
 using chatroom::Response;
 using chatroom::ChatService;
 
-//this is to generate random user name for each connection
-// std::string random_string( size_t length )
-// {
-//     srand (time(0));
-//     auto randchar = []() -> char
-//     {
-//         const char charset[] =
-//         "0123456789"
-//         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-//         "abcdefghijklmnopqrstuvwxyz";
-//         const size_t max_index = (sizeof(charset) - 1);
-//         return charset[ rand() % max_index ];
-//     };
-//     std::string str(length,0);
-//     std::generate_n( str.begin(), length, randchar );
-//     return str;
-// }
-
 class ChatClient {
  public:
   ChatClient(std::shared_ptr<Channel> channel)
@@ -40,31 +22,31 @@ class ChatClient {
   // from the server.
   std::string SayHello(const std::string& user) {
     // Data we are sending to the server.
-    Request request;
-    request.set_name(user);
-    std::string message;
-    std::getline(std::cin, message);
-    request.set_message(message);
-    request.set_timestamp((long int)time(NULL));
+      Request request;
+      request.set_name(user);
+      std::string message;
+      std::getline(std::cin, message);
+      request.set_message(message);
+      request.set_timestamp((long int)time(NULL));
 
-    // Container for the data we expect from the server.
-    Response reply;
+      // Container for the data we expect from the server.
+      Response reply;
 
-    // Context for the client. It could be used to convey extra information to
-    // the server and/or tweak certain RPC behaviors.
-    ClientContext context;
+      // Context for the client. It could be used to convey extra information to
+      // the server and/or tweak certain RPC behaviors.
+      ClientContext context;
 
-    // The actual RPC.
-    Status status = stub_->SayHello(&context, request, &reply);
+      // The actual RPC.
+      Status status = stub_->SayHello(&context, request, &reply);
 
-    // Act upon its status.
-    if (status.ok()) {
-      return reply.message();
-    } else {
-      std::cout << status.error_code() << ": " << status.error_message()
-                << std::endl;
-      return "RPC failed";
-    }
+      // Act upon its status.
+      if (status.ok()) {
+        return reply.message();
+      } else {
+        std::cout << status.error_code() << ": " << status.error_message()
+                  << std::endl;
+        return "RPC failed";
+      }
   }
 
  private:

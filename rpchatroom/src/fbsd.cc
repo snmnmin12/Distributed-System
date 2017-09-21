@@ -15,15 +15,13 @@ using chatroom::Response;
 using chatroom::ChatService;
 using chatroom::Message;
 
+
+//db<room, user>
+std::unordered_map<std::string, std::unordered_set<std::string>> db;
+//latest 
+
 // Logic and data behind the server's behavior.
 class ChatServiceImpl final : public ChatService::Service {
-private:
-    //map<room,map<user, message>> db;
-    std::unordered_map<std::string, std::unordered_map<std::string, Message>> db;
-public:
-  ChatServiceImpl() {
-
-  }
 
   Status SayHello(ServerContext* context, const Request* request,
                   Response* reply) override {
@@ -37,6 +35,8 @@ public:
     //reply->set_message(prefix + " " + message+ ": " + request->name());
     return Status::OK;
   }
+
+
 };
 
 void RunServer() {

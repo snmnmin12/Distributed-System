@@ -19,6 +19,7 @@ static const char* ChatService_method_names[] = {
   "/chatroom.ChatService/SayHello",
   "/chatroom.ChatService/join",
   "/chatroom.ChatService/leave",
+  "/chatroom.ChatService/list",
   "/chatroom.ChatService/send",
   "/chatroom.ChatService/sendAll",
   "/chatroom.ChatService/recvAll",
@@ -33,9 +34,10 @@ ChatService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channe
   : channel_(channel), rpcmethod_SayHello_(ChatService_method_names[0], ::grpc::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_join_(ChatService_method_names[1], ::grpc::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_leave_(ChatService_method_names[2], ::grpc::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_send_(ChatService_method_names[3], ::grpc::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_sendAll_(ChatService_method_names[4], ::grpc::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_recvAll_(ChatService_method_names[5], ::grpc::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_list_(ChatService_method_names[3], ::grpc::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_send_(ChatService_method_names[4], ::grpc::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_sendAll_(ChatService_method_names[5], ::grpc::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_recvAll_(ChatService_method_names[6], ::grpc::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status ChatService::Stub::SayHello(::grpc::ClientContext* context, const ::chatroom::Request& request, ::chatroom::Response* response) {
@@ -60,6 +62,14 @@ ChatService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channe
 
 ::grpc::ClientAsyncResponseReader< ::chatroom::Response>* ChatService::Stub::AsyncleaveRaw(::grpc::ClientContext* context, const ::chatroom::LeaveRequest& request, ::grpc::CompletionQueue* cq) {
   return ::grpc::ClientAsyncResponseReader< ::chatroom::Response>::Create(channel_.get(), cq, rpcmethod_leave_, context, request);
+}
+
+::grpc::Status ChatService::Stub::list(::grpc::ClientContext* context, const ::chatroom::ListRequest& request, ::chatroom::Response* response) {
+  return ::grpc::BlockingUnaryCall(channel_.get(), rpcmethod_list_, context, request, response);
+}
+
+::grpc::ClientAsyncResponseReader< ::chatroom::Response>* ChatService::Stub::AsynclistRaw(::grpc::ClientContext* context, const ::chatroom::ListRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::ClientAsyncResponseReader< ::chatroom::Response>::Create(channel_.get(), cq, rpcmethod_list_, context, request);
 }
 
 ::grpc::Status ChatService::Stub::send(::grpc::ClientContext* context, const ::chatroom::SendRequest& request, ::chatroom::Response* response) {
@@ -105,15 +115,20 @@ ChatService::Service::Service() {
   AddMethod(new ::grpc::RpcServiceMethod(
       ChatService_method_names[3],
       ::grpc::RpcMethod::NORMAL_RPC,
+      new ::grpc::RpcMethodHandler< ChatService::Service, ::chatroom::ListRequest, ::chatroom::Response>(
+          std::mem_fn(&ChatService::Service::list), this)));
+  AddMethod(new ::grpc::RpcServiceMethod(
+      ChatService_method_names[4],
+      ::grpc::RpcMethod::NORMAL_RPC,
       new ::grpc::RpcMethodHandler< ChatService::Service, ::chatroom::SendRequest, ::chatroom::Response>(
           std::mem_fn(&ChatService::Service::send), this)));
   AddMethod(new ::grpc::RpcServiceMethod(
-      ChatService_method_names[4],
+      ChatService_method_names[5],
       ::grpc::RpcMethod::NORMAL_RPC,
       new ::grpc::RpcMethodHandler< ChatService::Service, ::chatroom::SendAllRequest, ::chatroom::Response>(
           std::mem_fn(&ChatService::Service::sendAll), this)));
   AddMethod(new ::grpc::RpcServiceMethod(
-      ChatService_method_names[5],
+      ChatService_method_names[6],
       ::grpc::RpcMethod::NORMAL_RPC,
       new ::grpc::RpcMethodHandler< ChatService::Service, ::chatroom::RecvAllRequest, ::chatroom::ChatResponse>(
           std::mem_fn(&ChatService::Service::recvAll), this)));
@@ -137,6 +152,13 @@ ChatService::Service::~Service() {
 }
 
 ::grpc::Status ChatService::Service::leave(::grpc::ServerContext* context, const ::chatroom::LeaveRequest* request, ::chatroom::Response* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status ChatService::Service::list(::grpc::ServerContext* context, const ::chatroom::ListRequest* request, ::chatroom::Response* response) {
   (void) context;
   (void) request;
   (void) response;

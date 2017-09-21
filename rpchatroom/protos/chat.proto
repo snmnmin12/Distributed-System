@@ -10,6 +10,7 @@ service ChatService {
   rpc SayHello (Request) returns (Response) {}
   rpc join (JoinRequest) returns (Response);
   rpc leave (LeaveRequest) returns (Response);
+  rpc list (ListRequest) returns (Response);
   rpc send (SendRequest) returns (Response);
   rpc sendAll (SendAllRequest) returns (Response);
   rpc recvAll (RecvAllRequest) returns (ChatResponse);
@@ -43,6 +44,12 @@ message Message {
 message JoinRequest {
 	string name = 1;
 	string room = 2;
+}
+
+message ListRequest {
+	string name = 1;
+	string allrooms = 2;
+	string avail_rooms = 3;
 }
 
 message LeaveRequest {
