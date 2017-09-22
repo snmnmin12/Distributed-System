@@ -7,6 +7,7 @@ package chatroom;
 // The greeting service definition.
 service ChatService {
   // Sends a greeting
+  rpc CreateConnection(Request) returns(Response);
   rpc StartChat (stream Message) returns (stream Response);
   rpc Join (Request) returns (Response);
   rpc Leave (Request) returns (Response);

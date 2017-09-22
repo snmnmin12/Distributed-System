@@ -29,36 +29,38 @@ class ChatServiceImpl final : public ChatService::Service {
 
 private:
 	//db<room, user>
-	std::unordered_map<std::string, std::set<std::string>> db;
-	std::unordered_map<std::string, std::queue<std::string>> rmsgs;
-	std::vector<std::string> msgs = {"Hello", " I have no idea!", "Third Greeting!"};
+		std::unordered_map<std::string, std::set<std::string>> db;
+		std::unordered_map<std::string, std::queue<std::string>> rmsgs;
+		std::vector<std::string> msgs = {"Hello", " I have no idea!", "Third Greeting!"};
 
 public:
-  ChatServiceImpl() {
-  		for (int i = 1; i <= 10; i++) {
-  			std::string key = "room" + std::to_string(i);
-  			db[key] = std::set<std::string>();
-  			rmsgs[key] = std::queue<std::string>();
-  		}
-  }
+  ChatServiceImpl() { }
+ Status CreateConnection (ServerContext* context, const Request* request, Response* reply) {
+
+  		std::string key = request->name();
+  		db[key] = std::set<std::string>();
+  		rmsgs[key] = std::queue<std::string>();
+		
+		return Status::OK;
+  } 
 
   Status StartChat(ServerContext* context, ServerReaderWriter<Response, Message>* stream) override {
 
-    Message request;
-    (stream->Read(&request)); {
+    		Message request;
+    		(stream->Read(&request)); {
 
-      std::string message;
-      std::time_t  t = request.timestamp();
-      std::tm * ptm = std::localtime(&t);
-      char buffer[32];
-      std::strftime(buffer, 32, "%Y-%m-%d-%H:%M:%S", ptm);
-      std::cout <<  buffer << ": "<< request.name() << ": " << request.message() << std::endl;
-      //reply
-      Response reply;
-      std::string prefix = "[Server]: ";
-      reply.set_message(prefix + msgs[msgs.size()-1]);
-      stream->Write(reply);
-       msgs.push_back(request.message());
+    		std::string message;
+      		std::time_t  t = request.timestamp();
+      		std::tm * ptm = std::localtime(&t);
+      		char buffer[32];
+      		std::strftime(buffer, 32, "%Y-%m-%d-%H:%M:%S", ptm);
+      		std::cout <<  buffer << ": "<< request.name() << ": " << request.message() << std::endl;
+     		 //reply
+      		Response reply;
+      		std::string prefix = "[Server]: ";
+      		reply.set_message(prefix + msgs[msgs.size()-1]);
+      		stream->Write(reply);
+       		msgs.push_back(request.message());
     }
     return Status::OK;
   }
@@ -115,7 +117,7 @@ public:
   Status List (ServerContext* context, const ListRequest* request, ListResponse* reply) {
   		
   		std::string user = request->name();
-
+		reply->add_joinedrooms(user);
   		for (auto room : db) {
   			reply->add_allrooms(room.first);
   			if (room.second.count(user) != 0)
@@ -144,7 +146,7 @@ public:
 };
 
 void RunServer() {
-  std::string server_address("0.0.0.0:50051");
+  std::string server_address("0.0.0.0:50052");
   ChatServiceImpl service;
 
   ServerBuilder builder;

@@ -30,6 +30,17 @@ class ChatClient {
   ChatClient(std::shared_ptr<Channel> channel)
       : stub_(ChatService::NewStub(channel)) {}
    
+  void CreateConnection(const std::string& user) {
+
+	Request request;
+     	request.set_name(user);
+
+     	Response reply;
+  	ClientContext context;
+        Status status = stub_->CreateConnection(&context, request, &reply);
+	
+
+  }
 
   std::string StartChat(const std::string& user) {
         
@@ -75,7 +86,7 @@ class ChatClient {
 
      	Response reply;
 
-  		ClientContext context;
+  	ClientContext context;
 
         Status status = stub_->Join(&context, request, & reply);
 
@@ -97,12 +108,12 @@ class ChatClient {
 
   void List (const std::string& user) {
 
-  		ListRequest request;
-  		request.set_name(user);
+  	ListRequest request;
+  	request.set_name(user);
 
-  		ListResponse reply;
+  	ListResponse reply;
 
-  	    ClientContext context;
+  	ClientContext context;
         Status status = stub_->List(&context, request, & reply);
         
         if (status.ok()) {
@@ -132,7 +143,7 @@ class ChatClient {
   }
 
  private:
-  std::unique_ptr<ChatService::Stub> stub_;
+  	std::unique_ptr<ChatService::Stub> stub_;
 };
 
 
@@ -155,13 +166,12 @@ int main(int argc, char** argv) {
       address, grpc::InsecureChannelCredentials()));
 
   std::string user(argv[3]);
-
+  chat.CreateConnection(user);
 
   bool chatmode = false;
   while(true) {
 
-
-  	  std::string line;
+      std::string line;
       std::getline(std::cin, line);
 
 	 	 char* dup = (char*)line.c_str();
