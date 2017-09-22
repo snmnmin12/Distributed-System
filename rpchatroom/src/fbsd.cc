@@ -2,6 +2,8 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <set>
+#include <queue>
 
 #include <grpc++/grpc++.h>
 #include "chat.grpc.pb.h"
@@ -10,31 +12,133 @@ using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
+using grpc::ServerWriter;
+using grpc::ServerReaderWriter;
+
 using chatroom::Request;
 using chatroom::Response;
 using chatroom::ChatService;
 using chatroom::Message;
+using chatroom::ListRequest;
+using chatroom::SendRequest;
+using chatroom::ListResponse;
 
-
-//db<room, user>
-std::unordered_map<std::string, std::unordered_set<std::string>> db;
-//latest 
 
 // Logic and data behind the server's behavior.
 class ChatServiceImpl final : public ChatService::Service {
 
-  Status SayHello(ServerContext* context, const Request* request,
-                  Response* reply) override {
-    //std::string message;
-    std::time_t  t = request->timestamp();
-    std::tm * ptm = std::localtime(&t);
-    char buffer[32];
-    std::strftime(buffer, 32, "%Y-%m-%d-%H:%M:%S", ptm);
-    std::cout <<  buffer << ": "<< request->name() << ": " << request->message() << std::endl;
-    //std::getline(std::cin, message);
-    //reply->set_message(prefix + " " + message+ ": " + request->name());
+private:
+	//db<room, user>
+	std::unordered_map<std::string, std::set<std::string>> db;
+	std::unordered_map<std::string, std::queue<std::string>> rmsgs;
+	std::vector<std::string> msgs = {"Hello", " I have no idea!", "Third Greeting!"};
+
+public:
+  ChatServiceImpl() {
+  		for (int i = 1; i <= 10; i++) {
+  			std::string key = "room" + std::to_string(i);
+  			db[key] = std::set<std::string>();
+  			rmsgs[key] = std::queue<std::string>();
+  		}
+  }
+
+  Status StartChat(ServerContext* context, ServerReaderWriter<Response, Message>* stream) override {
+
+    Message request;
+    (stream->Read(&request)); {
+
+      std::string message;
+      std::time_t  t = request.timestamp();
+      std::tm * ptm = std::localtime(&t);
+      char buffer[32];
+      std::strftime(buffer, 32, "%Y-%m-%d-%H:%M:%S", ptm);
+      std::cout <<  buffer << ": "<< request.name() << ": " << request.message() << std::endl;
+      //reply
+      Response reply;
+      std::string prefix = "[Server]: ";
+      reply.set_message(prefix + msgs[msgs.size()-1]);
+      stream->Write(reply);
+       msgs.push_back(request.message());
+    }
     return Status::OK;
   }
+
+  Status Join (ServerContext* context, const Request* request, Response* reply) {
+
+  		std::string user = request->name();
+  		std::string room = request->room();
+  		std::string prefix = "[Server]: ";
+  		std::string YOU_ARE_IN = prefix + "YOU ARE ALREADY IN THE ROOM!";
+  		std::string SUCCESS = prefix + room + " JOIN SUCCESS!";
+
+  		if (db.find(room) != db.end()) {
+  				if (db[room].count(user) != 0) {
+  					reply->set_message(YOU_ARE_IN);
+  				}
+  				else {
+  					db[room].insert(user);
+  					reply->set_message(SUCCESS);
+  				}
+  		} else {
+
+  			db[room].insert(user);
+  			reply->set_message(SUCCESS);
+  		}
+
+  		return Status::OK;
+  } 
+
+  Status Leave (ServerContext* context, const Request* request, Response* reply) {
+
+  		std::string user = request->name();
+  		std::string room = request->room();
+  		std::string prefix = "[Server]: ";
+  		std::string NOT_EXIST = prefix + "Room NOT EXIST!";
+  		std::string YOU_NOT_IN = prefix + "YOU ARE NOT IN THE ROOM REQUESTED";
+  		std::string SUCCESS = prefix + "LEAVE SUCCESS!";
+
+  		if (db.find(room) != db.end()) {
+  			if (db[room].count(user) != 0) {
+  				db[room].erase(user);
+  				reply->set_message(SUCCESS);
+  			} else {
+
+  				reply->set_message(YOU_NOT_IN);
+  			}
+  		} else {
+  			reply->set_message(NOT_EXIST);
+  		}
+
+  	 	return Status::OK;
+  }
+
+  Status List (ServerContext* context, const ListRequest* request, ListResponse* reply) {
+  		
+  		std::string user = request->name();
+
+  		for (auto room : db) {
+  			reply->add_allrooms(room.first);
+  			if (room.second.count(user) != 0)
+  				reply->add_joinedrooms(room.first);
+  		}
+
+  		return Status::OK;
+  }
+
+  Status Send (ServerContext* context, const SendRequest * request, Response* reply) {
+
+  		return Status::OK;
+  }
+  
+  // Status SendAll (SendAllRequest) {
+
+  // 	returns Response;
+  // } 
+
+  // Status RecvAll (RecvAllRequest) {
+
+  // 	returns ChatResponse;
+  // }
 
 
 };
