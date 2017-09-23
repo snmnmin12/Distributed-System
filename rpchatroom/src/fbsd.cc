@@ -8,68 +8,78 @@
 #include <grpc++/grpc++.h>
 #include "chat.grpc.pb.h"
 
+using namespace std;
+
 using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
-using grpc::Status;
+using grpc::ClientContext;
 using grpc::ServerWriter;
+using grpc::ClientReader;
 using grpc::ServerReaderWriter;
+using grpc::ClientReaderWriter;
+using grpc::Status;
+using grpc::Channel;
 
+using chatroom::ChatService;
+using chatroom::AntiService;
 using chatroom::Request;
 using chatroom::Response;
-using chatroom::ChatService;
 using chatroom::Message;
 using chatroom::ListRequest;
 using chatroom::SendRequest;
 using chatroom::ListResponse;
 
+class AntiClient;
 
 // Logic and data behind the server's behavior.
 class ChatServiceImpl final : public ChatService::Service {
 
 private:
 	//db<room, user>
-	std::unordered_map<std::string, std::set<std::string>> db;
-	std::unordered_map<std::string, std::queue<std::string>> rmsgs;
-	std::vector<std::string> msgs = {"Hello", " I have no idea!", "Third Greeting!"};
+		unordered_map<string, set<string>> db;
+		unordered_map<string, queue<string>> rmsgs;
+		vector<string> msgs = {"Hello", " I have no idea!", "Third Greeting!"};
 
 public:
-  ChatServiceImpl() {
-  		for (int i = 1; i <= 10; i++) {
-  			std::string key = "room" + std::to_string(i);
-  			db[key] = std::set<std::string>();
-  			rmsgs[key] = std::queue<std::string>();
-  		}
-  }
+  ChatServiceImpl() { }
+ Status CreateConnection (ServerContext* context, const Request* request, Response* reply) {
+
+  		string key = request->name();
+  		db[key] = set<string>();
+  		rmsgs[key] = queue<string>();
+		
+		return Status::OK;
+  } 
 
   Status StartChat(ServerContext* context, ServerReaderWriter<Response, Message>* stream) override {
 
-    Message request;
-    (stream->Read(&request)); {
+    		Message request;
+    		(stream->Read(&request)); {
 
-      std::string message;
-      std::time_t  t = request.timestamp();
-      std::tm * ptm = std::localtime(&t);
-      char buffer[32];
-      std::strftime(buffer, 32, "%Y-%m-%d-%H:%M:%S", ptm);
-      std::cout <<  buffer << ": "<< request.name() << ": " << request.message() << std::endl;
-      //reply
-      Response reply;
-      std::string prefix = "[Server]: ";
-      reply.set_message(prefix + msgs[msgs.size()-1]);
-      stream->Write(reply);
-       msgs.push_back(request.message());
+    		string message;
+      		time_t  t = request.timestamp();
+      		tm * ptm = localtime(&t);
+      		char buffer[32];
+      		strftime(buffer, 32, "%Y-%m-%d-%H:%M:%S", ptm);
+      		cout <<  buffer << ": "<< request.name() << ": " << request.message() << endl;
+     		 //reply
+      		Response reply;
+      		string prefix = "[Server]: ";
+      		reply.set_message(prefix + msgs[msgs.size()-1]);
+      		stream->Write(reply);
+       		msgs.push_back(request.message());
     }
     return Status::OK;
   }
 
   Status Join (ServerContext* context, const Request* request, Response* reply) {
 
-  		std::string user = request->name();
-  		std::string room = request->room();
-  		std::string prefix = "[Server]: ";
-  		std::string YOU_ARE_IN = prefix + "YOU ARE ALREADY IN THE ROOM!";
-  		std::string SUCCESS = prefix + room + " JOIN SUCCESS!";
+  		string user = request->name();
+  		string room = request->room();
+  		string prefix = "[Server]: ";
+  		string YOU_ARE_IN = prefix + "YOU ARE ALREADY IN THE ROOM!";
+  		string SUCCESS = prefix + room + " JOIN SUCCESS!";
 
   		if (db.find(room) != db.end()) {
   				if (db[room].count(user) != 0) {
@@ -90,12 +100,12 @@ public:
 
   Status Leave (ServerContext* context, const Request* request, Response* reply) {
 
-  		std::string user = request->name();
-  		std::string room = request->room();
-  		std::string prefix = "[Server]: ";
-  		std::string NOT_EXIST = prefix + "Room NOT EXIST!";
-  		std::string YOU_NOT_IN = prefix + "YOU ARE NOT IN THE ROOM REQUESTED";
-  		std::string SUCCESS = prefix + "LEAVE SUCCESS!";
+  		string user = request->name();
+  		string room = request->room();
+  		string prefix = "[Server]: ";
+  		string NOT_EXIST = prefix + "Room NOT EXIST!";
+  		string YOU_NOT_IN = prefix + "YOU ARE NOT IN THE ROOM REQUESTED";
+  		string SUCCESS = prefix + "LEAVE SUCCESS!";
 
   		if (db.find(room) != db.end()) {
   			if (db[room].count(user) != 0) {
@@ -114,8 +124,8 @@ public:
 
   Status List (ServerContext* context, const ListRequest* request, ListResponse* reply) {
   		
-  		std::string user = request->name();
-
+  		string user = request->name();
+		reply->add_joinedrooms(user);
   		for (auto room : db) {
   			reply->add_allrooms(room.first);
   			if (room.second.count(user) != 0)
@@ -143,8 +153,32 @@ public:
 
 };
 
+/* This class is used to connect to the server on client side */
+class AntiClient {
+
+private:
+  	unique_ptr<AntiService::Stub> stub_;
+	
+public:
+	AntiClient(shared_ptr<Channel> channel)
+      : stub_(AntiService::NewStub(channel)) {}
+   
+	string SendMsg(Message& msg) {
+     	Response reply;
+		ClientContext context;
+        Status status = stub_->SendMsg(&context, msg, &reply);
+		if (status.ok()) {
+			return reply.message();
+		} else {
+			cout << status.error_code() << ": " << status.error_message()
+                << endl;
+		return "RPC failed";
+		}
+	}	
+};
+
 void RunServer() {
-  std::string server_address("0.0.0.0:50051");
+  string server_address("0.0.0.0:50052");
   ChatServiceImpl service;
 
   ServerBuilder builder;
@@ -154,8 +188,8 @@ void RunServer() {
   // clients. In this case it corresponds to an *synchronous* service.
   builder.RegisterService(&service);
   // Finally assemble the server.
-  std::unique_ptr<Server> server(builder.BuildAndStart());
-  std::cout << "Server listening on " << server_address << std::endl;
+  unique_ptr<Server> server(builder.BuildAndStart());
+  cout << "Server listening on " << server_address << endl;
 
   // Wait for the server to shutdown. Note that some other thread must be
   // responsible for shutting down the server for this call to ever return.
