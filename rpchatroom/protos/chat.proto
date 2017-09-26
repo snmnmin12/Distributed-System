@@ -4,25 +4,34 @@ option java_package = "ex.grpc";
 
 package chatroom;
 
-// The greeting service definition.
+// The main chatroom service definition.
 service ChatService {
-  // Sends a greeting
-  rpc StartChat (stream Message) returns (stream Response);
+  rpc CreateConnection(Request) returns(Response);
+  rpc Register (Request) returns (PortNumber);
+  rpc OldMessages (Request) returns (Response);
+  rpc StartChat (Message) returns (Response);
   rpc Join (Request) returns (Response);
   rpc Leave (Request) returns (Response);
   rpc List (ListRequest) returns (ListResponse);
   rpc Send (SendRequest) returns (Response);
-  rpc SendAll (SendAllRequest) returns (Response);
-  rpc RecvAll (RecvAllRequest) returns (ChatResponse);
 }
 
+//
+service AntiService {
+	rpc SendMsg(Message) returns (Response);
+	rpc SendText(Response) returns (Response);
+}
+
+message PortNumber {
+	string name = 1;
+	int32 portnum = 2;
+}
 // The request message containing the user's name.
 message Request {
   string name = 1;
   string room = 2;
 }
 
-// The response message containing the greetings
 message Response {
   string message = 1;
 }
@@ -50,18 +59,8 @@ message ListResponse {
 	repeated string joinedrooms = 2;
 }
 
-
 message SendRequest {
 	string name = 1;
 	string room = 2;
 	string message = 3;
-}
-
-message SendAllRequest{
-	string name = 1;
-	string message = 2;
-}
-
-message RecvAllRequest{
-	string name = 1;
 }
