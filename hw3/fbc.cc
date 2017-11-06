@@ -39,6 +39,10 @@
 #include <string>
 #include <thread>
 #include <unistd.h>
+#include <sstream>
+#include <atomic>
+#include <fstream>
+#include <sys/select.h>
 
 #include <grpc++/grpc++.h>
 
@@ -59,8 +63,28 @@ using hw3::MessengerServer;
 // using hw3::ServerToServer;
 
 
+int kbhit(void)
+{
+    struct timeval tv;
+    fd_set read_fd;
+
+    tv.tv_sec=0;
+    tv.tv_usec=0;
+    FD_ZERO(&read_fd);
+    FD_SET(0,&read_fd);
+
+    if(select(1, &read_fd, NULL, NULL, &tv) == -1)
+    return 0;
+
+    if(FD_ISSET(0,&read_fd))
+    return 1;
+
+    return 0;
+}
+
 //access the global configuration files for adress of other servers
 static ParameterReader pd;
+std::atomic<bool> flag{false};
 // std::vector<std::string> servernames = pd.getServerNames();
 
 //Helper function used to create a Message object given a username and message
@@ -80,6 +104,14 @@ class MessengerClient {
   MessengerClient(std::shared_ptr<Channel> channel)
       : stub_(MessengerServer::NewStub(channel)) {}
 
+  bool ShakeHand() {
+        Reply request, reply;
+        request.set_msg("hi");
+        ClientContext context;
+        Status status = stub_->ShakeHand(&context, request, &reply);
+        if (status.ok()) return true;
+        return false;
+  }
   //Calls the List stub function and prints out room names
   void List(const std::string& username){
     //Data being sent to the server
@@ -88,10 +120,8 @@ class MessengerClient {
   
     //Container for the data from the server
     ListReply list_reply;
-
     //Context for the client
     ClientContext context;
-  
     Status status = stub_->List(&context, request, &list_reply);
 
     //Loop through list_reply.all_rooms and list_reply.joined_rooms
@@ -121,11 +151,9 @@ class MessengerClient {
     request.set_username(username1);
     //username2 is the name of the room we're joining
     request.add_arguments(username2);
-
     Reply reply;
 
     ClientContext context;
-
     Status status = stub_->Join(&context, request, &reply);
 
     if(status.ok()){
@@ -149,9 +177,7 @@ class MessengerClient {
     request.add_arguments(username2);
 
     Reply reply;
-
     ClientContext context;
-
     Status status = stub_->Leave(&context, request, &reply);
 
     if(status.ok()){
@@ -172,9 +198,7 @@ class MessengerClient {
     Request request;
     
     request.set_username(username);
-
     Reply reply;
-
     ClientContext context;
 
     Status status = stub_->Login(&context, request, &reply);
@@ -193,27 +217,34 @@ class MessengerClient {
   }
 
   //Calls the Chat stub function which uses a bidirectional RPC to communicate
-  void Chat (const std::string& username, std::string restart = "") {
+  bool Chat (const std::string& username, std::string restart = "") {
     ClientContext context;
     Reply request, reply;
     request.set_msg("hi");
+    flag  = false;
+
+    std::string cached = restart;
 
     std::shared_ptr<ClientReaderWriter<Message, Message>> stream(stub_->Chat(&context));
-    std::string cached = restart;
+
     //Thread used to read chat messages and send them to the server
-    std::thread writer([username, stream, &cached,this]() { 
+    std::thread writer([username, stream, &cached, this]() { 
       Reply request, reply;
       request.set_msg("hi");
       // std::cout << "cached is: "<< cached << std::endl;
       if (cached == "") { cached = "Set Stream"; std::cout << "Enter chat messages: \n";} 
       Message m = MakeMessage(username, cached);
       stream->Write(m);
-      while(getline(std::cin, cached)){
-        ClientContext context2;
-        Status status = this->stub_->ShakeHand(&context2, request, &reply);
-        if (!status.ok()) {break;}
-        m = MakeMessage(username, cached);
-        stream->Write(m);
+      //while(!flag && getline(std::cin, cached)){
+      while(true){
+        if(!this->ShakeHand()) {break;}
+        std::streamsize size = std::cin.rdbuf()->in_avail();
+        if(size>0) {
+              getline(std::cin, cached);
+              m = MakeMessage(username, cached);
+              stream->Write(m);
+        }
+        sleep(1);
       }
       stream->WritesDone();
     });
@@ -228,18 +259,31 @@ class MessengerClient {
     //Wait for the threads to finish
     writer.join();
     reader.join();
-    if (resetServer()) {Chat(username, cached);}
+    if(resetServer()) {Chat(username);}
+    return false;
   }
 
   bool resetServer() {  
-        std::vector<std::string> servernames = pd.getServerNames();
-        for (auto& name : servernames) {
+        std::vector<std::string> ports = pd.getData();
+        for (int i = 0; i < 1; i++) {
+              std::string port = ports[i];
+              std::string login_info = "localhost:"+port;
+              std::shared_ptr<MessengerClient> messenger = std::make_shared<MessengerClient>(grpc::CreateChannel(
+                    login_info, grpc::InsecureChannelCredentials()));
+              std::string response = messenger->Login("hi");
+              if (response[0] == '$') {
+                  login_info = response.substr(1, response.size()-1);
+                  std::cout << "Server Breaking Down, reconnecting to "<< login_info << std::endl;
+                  stub_ = std::move(MessengerServer::NewStub(grpc::CreateChannel(login_info, grpc::InsecureChannelCredentials())));
+              }
               ClientContext context;
               Reply request, reply;
               request.set_msg("Hi");
-              stub_ = std::move(MessengerServer::NewStub(grpc::CreateChannel(pd.getData(name), grpc::InsecureChannelCredentials())));
               Status status = stub_->ShakeHand(&context, request, &reply);
-              if (status.ok()) return true;
+              if (status.ok()) {
+               std::cout << "Connected! " << std::endl;
+               return true;
+             }
         }
         return false;
   }
@@ -292,24 +336,27 @@ int main(int argc, char** argv) {
   // are created. This channel models a connection to an endpoint (in this case,
   // localhost at port 50051). We indicate that the channel isn't authenticated
   // (use of InsecureChannelCredentials()).
-
+  std::cin.sync_with_stdio(false);
   std::string server_add = "server1";
   std::string username = "default";
+  std::string port = "3000";
   // std::string port = "3010";
   int opt = 0;
-  while ((opt = getopt(argc, argv, "s:u:")) != -1){
+  while ((opt = getopt(argc, argv, "s:u:p:")) != -1){
     switch(opt) {
       case 's':
-	  server_add = optarg;break;
+	        server_add = optarg;break;
       case 'u':
           username = optarg;break;
+      case 'p':
+          port = optarg;break;
       default: 
 	  std::cerr << "Invalid Command Line Argument\n";
     }
   }
 
   // std::string login_info = hostname + ":" + port;
-  std::string login_info = pd.getData(server_add);
+  std::string login_info = "localhost:"+port;
 
   //Create the messenger client with the login info
   // MessengerClient *messenger = new MessengerClient(grpc::CreateChannel(
@@ -318,6 +365,16 @@ int main(int argc, char** argv) {
         login_info, grpc::InsecureChannelCredentials()));
   //Call the login stub function
   std::string response = messenger->Login(username);
+  if (response[0] == '$') {
+      login_info = response.substr(1, response.size()-1);
+      if (login_info.size() == 0) {
+        std::cout << "Server is still initializing!" << std::endl;
+        return 0;
+      }
+      std::cout << "This is redirected: "<< login_info << std::endl;
+      messenger = std::make_shared<MessengerClient>(grpc::CreateChannel(login_info, grpc::InsecureChannelCredentials()));
+      response = messenger->Login(username);
+  }
   //If the username already exists, exit the client
   if(response == "Invalid Username"){
     std::cout << "Invalid Username -- please log in with a different username \n";

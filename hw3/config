@@ -1,3 +1,17 @@
-server1=localhost:3010
-server2=localhost:3011
-server3=localhost:3012
+#master node and replica node on master server
+3000
+3010
+
+#worker on master server
+3011
+3012
+
+#server1
+#3020
+#3021
+#3022
+
+#server2
+#3030
+#3031
+#3032

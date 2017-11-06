@@ -33,23 +33,33 @@ package hw3;
 
 import "google/protobuf/timestamp.proto";
 
+
+service ServerComm {
+  rpc ShakeHand(Reply) returns (Reply) {}
+  rpc ID(Reply) returns (Reply) {}
+  rpc DataSync(Reply) returns (Data){}
+}
+
 // The messenger service definition.
 service MessengerServer {
-  rpc ShakeHand(Reply) returns (Reply) {}
   rpc Login (Request) returns (Reply) {}
   rpc List (Request) returns (ListReply) {}
   rpc Join (Request) returns (Reply) {}
   rpc Leave (Request) returns (Reply) {}
   // Bidirectional streaming RPC
   rpc Chat (stream Message) returns (stream Message) {} 
-  rpc ServerCommunicate(Data) returns(Reply){}
+  rpc ShakeHand(Reply) returns (Reply) {}
+  //rpc ServerCommunicate(Data) returns(Reply){}
   rpc Forward(SMessage) returns(Reply){}
 }
 
 message Data {
-  string username = 1;
-  repeated string followers = 2;
-  repeated string following = 3;
+  message ClientData {
+    string username = 1;
+    repeated string followers = 2;
+    repeated string following = 3;
+  }
+  repeated ClientData clidata = 1;
 }
 
 message ListReply {
@@ -77,6 +87,7 @@ message Message {
 }
 
 message SMessage {
-  string username = 1;
-  Message msg = 2; 
+  string from = 1;
+  string username = 2;
+  Message msg = 3; 
 }
