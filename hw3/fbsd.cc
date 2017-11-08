@@ -52,6 +52,7 @@
 #include <map>
 #include <set>
 #include <random>
+#include <atomic>
 #include <google/protobuf/util/time_util.h>
 #include <grpc++/grpc++.h>
 
@@ -100,6 +101,12 @@ class ServerChatClient;
 bool isLeader = false;
 bool isMaster = false;
 int server_id = 0;
+int back_up_id = 1;
+std::atomic<bool> startflag{false};
+
+std::shared_ptr<ServerClient> primary = nullptr;
+
+
 std::string leader_addr = "";
 // std::vector<ServerInfo> servers;
 std::map<std::string, std::shared_ptr<ServerClient>> sservers;
@@ -108,11 +115,12 @@ std::map<std::string, std::shared_ptr<ServerChatClient>> cservers;
 std::vector<std::shared_ptr<Client>> client_db;
 //access the global configuration files for adress of other servers
 std::string myname;
-std::string hostname, myport;
+std::string myport, machine1, machine2, machine3;
 static ParameterReader pd;
 std::vector<std::string> ports = pd.getData();
 
-
+//count the number of heartbeam happend
+int count = 0;
 //Helper function used to find a Client object given its username
 int find_user(std::string username){
       for (int index = 0; index < client_db.size(); index++) {if (client_db[index]->username == username) return index;}
@@ -123,6 +131,10 @@ int find_user(std::string username){
 class ServerCommImpl final : public ServerComm::Service {
 
     Status ShakeHand(ServerContext* context, const Reply* request, Reply* reply) {
+    	std::string hostname = "0.0.0.0";
+    	if (server_id < 4) hostname = machine1;
+    	else if (server_id < 7) hostname = machine2;
+    	else hostname = machine3;
         if (isLeader) reply->set_msg(std::to_string(1) + "::" + hostname+":"+ports[server_id]);
         else reply->set_msg(std::to_string(0) + "::" + hostname+":"+ports[server_id]);
         return Status::OK;
@@ -136,16 +148,13 @@ class ServerCommImpl final : public ServerComm::Service {
     Status DataSync(ServerContext* context, const Reply* request, Data* data) {
 
         if (isLeader) {
-
             for (auto cli : client_db) {
                 Data::ClientData* clidata = data->add_clidata();
                 clidata->set_username(cli->username);
                 for (auto& p : cli->client_followers) {  clidata->add_followers(p->username);}
                 for (auto& p : cli->client_following) {  clidata->add_following(p->username);}
             }
-
         }
-
         return Status::OK;
     }
 };
@@ -166,8 +175,10 @@ public:
             leader_addr = temp;
         }
         if (status.ok()) {
-            sleep(1);
-            std::cout << "Shakehand server id: " << server_id << " --> " << address << std::endl;
+            // sleep(1);
+            if(address.size() != 0 && count%10 == 0) {
+             std::cout << "Shakehand server id: " << server_id << " --> " << address << std::endl;
+            }
             return true;
         }
         return false;
@@ -510,12 +521,13 @@ class MessengerServiceImpl final : public MessengerServer::Service {
         continue;
       }
       //Send the message to each follower's stream
-      std::cout <<"follower size: "<<c->client_followers.size() << std::endl;
+      // std::cout <<"follower size: "<<c->client_followers.size() << std::endl;
+      for(const auto& s: cservers) {s.second->Forward(username, username, message);}
       for(auto& p : c->client_followers){
-        std::cout <<"Ready to forward"<<std::endl;
+        // std::cout <<"Ready to forward"<<std::endl;
         if(p->stream!=0 && p->connected)   p->stream->Write(message);
-        else if (p->stream == 0) { if(cservers.size() > 0) {for(const auto& s: cservers) {s.second->Forward(username, p->username, message);}}}
-        std::cout <<"Forward completed!"<<std::endl;
+        else if (p->stream == 0) { if(cservers.size() > 0) {for(const auto& s: cservers) {s.second->Forward("", p->username, message);}}}
+        // std::cout <<"Forward completed!"<<std::endl;
         //For each of the current user's followers, put the message in their following.txt file
         if(isLeader) 
         {
@@ -543,13 +555,13 @@ class MessengerServiceImpl final : public MessengerServer::Service {
       // std::cout <<"User name: "<< username << std::endl;
       int index = find_user(username);
       // std::cout <<"Index: "<< index << std::endl;
-      if (index != -1) {
+      if (index != -1 && from !=username) {
       if (client_db[index]->stream != 0 && client_db[index]->connected)  {
             // std::cout << "useranme: " << client_db[index].username << std::endl;
             client_db[index]->stream->Write(message);
         }
       }
-      if (isLeader) {
+      if (from.size() !=0 && isLeader) {
           int client_index = find_user(from);
           auto c = client_db[client_index];
           std::string filename = from+".txt";
@@ -578,8 +590,11 @@ class MessengerServiceImpl final : public MessengerServer::Service {
 //initialize the servers
 void initlizedServers() {
     
-    for (int i = 1; i <  ports.size(); i++) {
+    for (int i = 2; i <  ports.size(); i++) {
         if (i == server_id) continue;
+        std::string hostname = machine1;
+        if (i >= 4 && i <=6) hostname = machine2;
+        else if (i>6) hostname = machine3; 
         std::string address = hostname+":"+ports[i];
         std::shared_ptr<ServerClient> messenger = std::make_shared<ServerClient>(grpc::CreateChannel(
         address, grpc::InsecureChannelCredentials())); 
@@ -590,7 +605,10 @@ void initlizedServers() {
         cservers[address] = messenger2;
         // }
     }
-    // std::cout << myname << ": " << servers.size() << std::endl;
+    if (isMaster) {
+        std::string address = "0.0.0.0:"+ports[0];
+        primary = std::make_shared<ServerClient>(grpc::CreateChannel(address, grpc::InsecureChannelCredentials())); 
+    }
 }
 
 // void* RunCommServer(void* invalid) {
@@ -613,8 +631,7 @@ void initlizedServers() {
 // }
 
 void RunServer(std::string hostname) {
-  // std::string server_address = "localhost:"+port_no;
-  std::string server_address = hostname +":"+myport;
+  std::string server_address = "0.0.0.0:"+myport;
   MessengerServiceImpl service;
   ServerCommImpl service2;
 
@@ -657,13 +674,13 @@ void* restart(void* data) {
   int index = (*addres).find(":");
   if (index == -1) return 0;
   std::string pot = (*addres).substr(index+1, (*addres).size()-index-1);
-  
-  auto it = std::find(ports.begin(), ports.end(), pot);
-  int index2 = it - ports.begin();
+  int index2 = pd.getServiceID(pot);
   std::string cmd = "./fbsd";
-  cmd = cmd +  " -s " + "localhost";
+  cmd = cmd + " -z " + machine3; 
+  cmd = cmd + " -y " + machine2; 
+  cmd = cmd + " -x " + machine1;
   cmd = cmd + " -i " + std::to_string(index2);
-  if (index2 == 1) cmd = cmd + " -l";
+  if (index2 == 2 || index2 == 4 || index2 == 7) cmd = cmd + " -l";
   if(system(cmd.c_str()) == -1){
     std::cerr << "Error: Could not start new process" << '\n';
   }
@@ -672,44 +689,63 @@ void* restart(void* data) {
 }
 
 void* heartBeatMonitor(void* invalid) {
-
     pthread_t startNewServer_tid = -1;
     while(true) {
-      if (isMaster) {
+      sleep(1);
+      if (isMaster && !isLeader) {
+                if (primary != nullptr && !primary->ShakeHand("")) {
+                    std::string address = "0.0.0.0:"+ports[0];
+                    primary = std::make_shared<ServerClient>(grpc::CreateChannel(address, grpc::InsecureChannelCredentials())); 
+                    if (!primary->ShakeHand("")) {isLeader = true;}
+                    else isLeader = false;
+                } else { isLeader = false;}
+      }
+
+      if (isMaster && isLeader) {
+	    
+            if(!startflag) {std::cout<<"Servers are initializing, please wait........"<<std::endl;}
             for (auto& item : sservers) {
                 auto& key = item.first;
+                int index = key.find(":");
+                std::string pot = key.substr(index+1, key.size()-index-1);
                 std::string* addr = new std::string(key);
                 auto& conn = item.second;
                 bool pulse = conn->ShakeHand(key); 
-                //usleep(microseconds * 1000);
                 if (!pulse) {
                     {
                           std::cout<<"Have lost the connection!"<<std::endl;
-                          pthread_create(&startNewServer_tid, NULL, &restart, (void*)addr);
+                          if (pd.getServiceID(pot) < 4) { //service is local
+                          		pthread_create(&startNewServer_tid, NULL, &restart, (void*)addr);
+                          }
                           std::string address = key;
                           std::shared_ptr<ServerClient> messenger = std::make_shared<ServerClient>(grpc::CreateChannel(
                           address, grpc::InsecureChannelCredentials())); 
                          if (messenger->ShakeHand(myname)) { sservers[key] = messenger;}
                      }
                 }
+                sleep(1);
             }
-      }
-      sleep(1);
-
+	    count += 1;
+            startflag = true;
+      } 
     }
-
 }
 
 int main(int argc, char** argv) {
   
   // std::string port = "3010";
-  hostname = "localhost";
-  myport = "3010";
+  // hostname = "localhost";
+  myport = "3123";
+  machine1 = "0.0.0.0";
   int opt = 0;
-  while ((opt = getopt(argc, argv, "s:lmi:")) != -1){
+  while ((opt = getopt(argc, argv, "x:y:z:mli:")) != -1){
     switch(opt) {
-      case 's':
-          hostname = optarg; break;
+      case 'x':
+          machine1 = optarg; break;
+      case 'y':
+      	  machine2 = optarg; break;
+      case 'z':
+      	  machine3 = optarg; break;
       case 'l':
           isLeader = true; break;
       case 'm':
@@ -722,15 +758,10 @@ int main(int argc, char** argv) {
   }
   srand(time(0));
   myport = ports[server_id];
-
   pthread_t client_tid = -1, heartbeat_tid = -1;
-  // Monitor other local server heartbeats
-  // pthread_create(&client_tid, NULL, &RunCommServer, (void*) NULL); 
-  // sleep(1);
   initlizedServers();
+  sleep(1);
   pthread_create(&heartbeat_tid, NULL, &heartBeatMonitor, (void*) NULL);  
-  sleep(1);
-  RunServer(hostname);
-  sleep(1);
+  RunServer(machine1);
   return 0;
 }

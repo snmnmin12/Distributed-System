@@ -62,26 +62,7 @@ using hw3::Reply;
 using hw3::MessengerServer;
 // using hw3::ServerToServer;
 
-
-int kbhit(void)
-{
-    struct timeval tv;
-    fd_set read_fd;
-
-    tv.tv_sec=0;
-    tv.tv_usec=0;
-    FD_ZERO(&read_fd);
-    FD_SET(0,&read_fd);
-
-    if(select(1, &read_fd, NULL, NULL, &tv) == -1)
-    return 0;
-
-    if(FD_ISSET(0,&read_fd))
-    return 1;
-
-    return 0;
-}
-
+std::string server_add = "0.0.0.0";
 //access the global configuration files for adress of other servers
 static ParameterReader pd;
 std::atomic<bool> flag{false};
@@ -259,15 +240,16 @@ class MessengerClient {
     //Wait for the threads to finish
     writer.join();
     reader.join();
-    if(resetServer()) {Chat(username);}
+    if(resetServer()) {Chat(username, "Continued");}
     return false;
   }
 
   bool resetServer() {  
+	std::cout <<"Ready to reset server!" <<std::endl;
         std::vector<std::string> ports = pd.getData();
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 2; i++) {
               std::string port = ports[i];
-              std::string login_info = "localhost:"+port;
+              std::string login_info = server_add+":"+port;
               std::shared_ptr<MessengerClient> messenger = std::make_shared<MessengerClient>(grpc::CreateChannel(
                     login_info, grpc::InsecureChannelCredentials()));
               std::string response = messenger->Login("hi");
@@ -337,9 +319,9 @@ int main(int argc, char** argv) {
   // localhost at port 50051). We indicate that the channel isn't authenticated
   // (use of InsecureChannelCredentials()).
   std::cin.sync_with_stdio(false);
-  std::string server_add = "server1";
+  std::string server_add = "0.0.0.0";
   std::string username = "default";
-  std::string port = "3000";
+  std::string port = "3123";
   // std::string port = "3010";
   int opt = 0;
   while ((opt = getopt(argc, argv, "s:u:p:")) != -1){
@@ -356,25 +338,26 @@ int main(int argc, char** argv) {
   }
 
   // std::string login_info = hostname + ":" + port;
-  std::string login_info = "localhost:"+port;
-
-  //Create the messenger client with the login info
-  // MessengerClient *messenger = new MessengerClient(grpc::CreateChannel(
-  //       login_info, grpc::InsecureChannelCredentials())); 
-  std::shared_ptr<MessengerClient> messenger = std::make_shared<MessengerClient>(grpc::CreateChannel(
-        login_info, grpc::InsecureChannelCredentials()));
-  //Call the login stub function
+  std::vector<std::string> ports = pd.getData();
+  std::shared_ptr<MessengerClient> messenger;
+  std::string login_info = server_add+":"+port;
+  for (int i = 0; i < 2; i++) {
+        login_info = server_add+":"+ports[i];
+        messenger = std::make_shared<MessengerClient>(grpc::CreateChannel(login_info, grpc::InsecureChannelCredentials()));
+        if(messenger->ShakeHand())  break;
+  }
+  //login
   std::string response = messenger->Login(username);
   if (response[0] == '$') {
       login_info = response.substr(1, response.size()-1);
       if (login_info.size() == 0) {
-        std::cout << "Server is still initializing!" << std::endl;
-        return 0;
+            std::cout << "Server is still initializing!" << std::endl;
+            return 0;
       }
       std::cout << "This is redirected: "<< login_info << std::endl;
       messenger = std::make_shared<MessengerClient>(grpc::CreateChannel(login_info, grpc::InsecureChannelCredentials()));
-      response = messenger->Login(username);
   }
+  messenger->Login(username);
   //If the username already exists, exit the client
   if(response == "Invalid Username"){
     std::cout << "Invalid Username -- please log in with a different username \n";
