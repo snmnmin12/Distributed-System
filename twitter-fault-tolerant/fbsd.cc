@@ -82,6 +82,7 @@ using hw3::MessengerServer;
 using hw3::ServerComm;
 using hw3::Data;
 using hw3::SMessage;
+using hw3::Stat;
 
 //Client struct that holds a user's username, followers, and users they follow
 struct Client {
@@ -102,6 +103,7 @@ bool isLeader = false;
 bool isMaster = false;
 int server_id = 0;
 int back_up_id = 1;
+int ccount = 0;
 std::atomic<bool> startflag{false};
 
 std::shared_ptr<ServerClient> primary = nullptr;
@@ -111,16 +113,16 @@ std::string leader_addr = "";
 // std::vector<ServerInfo> servers;
 std::map<std::string, std::shared_ptr<ServerClient>> sservers;
 std::map<std::string, std::shared_ptr<ServerChatClient>> cservers;
+std::map<std::string, bool> server_status;
 //Vector that stores every client that has been created
 std::vector<std::shared_ptr<Client>> client_db;
 //access the global configuration files for adress of other servers
-std::string myname;
+std::string myname="";
 std::string myport, machine1, machine2, machine3;
 static ParameterReader pd;
 std::vector<std::string> ports = pd.getData();
 
-//count the number of heartbeam happend
-int count = 0;
+
 //Helper function used to find a Client object given its username
 int find_user(std::string username){
       for (int index = 0; index < client_db.size(); index++) {if (client_db[index]->username == username) return index;}
@@ -148,27 +150,43 @@ class ServerCommImpl final : public ServerComm::Service {
     Status DataSync(ServerContext* context, const Reply* request, Data* data) {
 
         if (isLeader) {
+
             for (auto cli : client_db) {
                 Data::ClientData* clidata = data->add_clidata();
                 clidata->set_username(cli->username);
                 for (auto& p : cli->client_followers) {  clidata->add_followers(p->username);}
                 for (auto& p : cli->client_following) {  clidata->add_following(p->username);}
             }
+
         }
+
         return Status::OK;
     }
+
+    Status PassStatus(ServerContext* context, const Stat* sta, Reply* reply) {
+          for (int i = 0; i < sta->statdata_size(); i++) {
+              Stat::StatData sdata = sta->statdata(i);
+              std::string key = sdata.addr();
+              bool  on = sdata.on();
+              if (server_status.find(key) != server_status.end()) {
+                server_status[key] = on;
+              }
+          }
+          return Status::OK;
+    } 
 };
 
 class ServerClient{
 public:
     ServerClient(std::shared_ptr<Channel> channel)
       : stub_(ServerComm::NewStub(channel)) {}
-
-    bool ShakeHand(const std::string& address) { 
+    //shaking hand
+    bool ShakeHand(const std::string address) { 
         Reply request, reply;
         request.set_msg(address);
         ClientContext context;
         Status status = stub_->ShakeHand(&context, request, &reply);
+        if(!status.ok()) return false;
         std::string temp = reply.msg();
         if (temp.substr(0, temp.find("::")).compare("1") == 0){
             temp.erase(0, temp.find("::") + 2);
@@ -176,14 +194,14 @@ public:
         }
         if (status.ok()) {
             // sleep(1);
-            if(address.size() != 0 && count%10 == 0) {
+            if(address.size() != 0 && ccount % 10 == 0) {
              std::cout << "Shakehand server id: " << server_id << " --> " << address << std::endl;
             }
             return true;
         }
         return false;
     }
-
+    //get the id of the process
     int ID() {
         Reply request, reply;
         request.set_msg("Hi");
@@ -191,6 +209,19 @@ public:
         Status status = stub_->ID(&context, request, &reply);
         if (status.ok()) return atoi(reply.msg().c_str());
         return 1000000;
+    }
+    //get the status of the process, failed or not failed
+    void PassStatus() {
+
+        Stat sta;
+        for (auto& item : server_status) {
+              Stat::StatData* sdata = sta.add_statdata();
+              sdata->set_addr(item.first);
+              sdata->set_on(item.second);
+        }
+        Reply reply;
+        ClientContext context;
+        Status status = stub_->PassStatus(&context, sta, &reply);
     }
 
     void DataSync() {
@@ -206,7 +237,7 @@ public:
             std::string username = clidata.username();
 
             if (find_user(username) == -1) {
-                auto c = std::make_shared<Client>(); c->username = username; client_db.push_back(c);
+                auto c = std::make_shared<Client>(); c->username = username; client_db.push_back(c);}
                 int index = find_user(username);
                 int size1 = clidata.followers().size();
                 int size2 = clidata.following().size();
@@ -221,7 +252,9 @@ public:
                       client->username = username1;
                       client_db.push_back(client);
                   }
-                 client_db[index]->client_followers.push_back(client_db[j]);
+                  auto& cl = client_db[index]->client_followers;
+                 if (std::find(cl.begin(), cl.end(),client_db[j]) == std::end(cl))
+                    cl.push_back(client_db[j]);
               }
 
               for (int i = 0; i < size2; i++) {
@@ -235,9 +268,11 @@ public:
                       client->username = username1;
                       client_db.push_back(client);
                   }
-                 client_db[index]->client_following.push_back(client_db[j]);
+                  auto& cl = client_db[index]->client_following;
+                  if (std::find(cl.begin(), cl.end(),client_db[j]) == std::end(cl))
+                  cl.push_back(client_db[j]);
               }
-          }
+          //}
       }
   }
 
@@ -253,7 +288,7 @@ public:
   ServerChatClient(std::shared_ptr<Channel> channel)
       : stub_(MessengerServer::NewStub(channel)) {}
 
-  bool ShakeHand(const std::string& key) {
+  bool ShakeHand(const std::string key) {
         Reply request, reply;
         request.set_msg(key);
         ClientContext context;
@@ -370,7 +405,7 @@ class MessengerServiceImpl final : public MessengerServer::Service {
     // if(servers.size() > 0) { for(auto& p : servers) }
     std::string username1 = request->username();
     std::string username2 = request->arguments(0);
-    if (cservers.size() > 0 && username1[0] != '$') { for(auto& p: cservers) {p.second->Join(username1, username2);}}
+    if (cservers.size() > 0 && username1[0] != '$') { for(auto& p: cservers) { if (!server_status[p.first])continue;p.second->Join(username1, username2);}}
     if (username1[0] == '$') username1 = username1.substr(1, username1.size()-1);
 
     int join_index = find_user(username2);
@@ -397,7 +432,7 @@ class MessengerServiceImpl final : public MessengerServer::Service {
   Status Leave(ServerContext* context, const Request* request, Reply* reply) override {
     std::string username1 = request->username();
     std::string username2 = request->arguments(0);
-    if (cservers.size() > 0 && username1[0] != '$') { for(auto& p: cservers) {p.second->Leave(username1, username2);}}
+    if (cservers.size() > 0 && username1[0] != '$') { for(auto& p: cservers) {if (!server_status[p.first])continue;p.second->Leave(username1, username2);}}
     if (username1[0] == '$') username1 = username1.substr(1, username1.size()-1);
 
     int leave_index = find_user(username2);
@@ -495,6 +530,7 @@ class MessengerServiceImpl final : public MessengerServer::Service {
       //"Set Stream" is the default message from the client to initialize the stream
       if(message.msg() != "Set Stream") {
           if (c->stream == 0) c->stream = stream;
+          if (message.msg() == "$continued") continue;
           if(isLeader) 
           {
                 std::ofstream user_file(filename,std::ios::app|std::ios::out|std::ios::in);
@@ -502,7 +538,7 @@ class MessengerServiceImpl final : public MessengerServer::Service {
           } 
       }
       //If message = "Set Stream", print the first 20 chats from the people you follow
-      else{
+      else {
         if(c->stream==0) c->stream = stream;
         std::string line;
         std::vector<std::string> newest_twenty;
@@ -511,7 +547,7 @@ class MessengerServiceImpl final : public MessengerServer::Service {
         //Read the last up-to-20 lines (newest 20 messages) from userfollowing.txt
         while(getline(in, line)){
              if(c->following_file_size > 20){
-	           if(count < c->following_file_size-20){ count++; continue;}
+	                 if(count < c->following_file_size-20){ count++; continue;}
              }
              newest_twenty.push_back(line);
         }
@@ -522,11 +558,11 @@ class MessengerServiceImpl final : public MessengerServer::Service {
       }
       //Send the message to each follower's stream
       // std::cout <<"follower size: "<<c->client_followers.size() << std::endl;
-      for(const auto& s: cservers) {s.second->Forward(username, username, message);}
       for(auto& p : c->client_followers){
         // std::cout <<"Ready to forward"<<std::endl;
         if(p->stream!=0 && p->connected)   p->stream->Write(message);
-        else if (p->stream == 0) { if(cservers.size() > 0) {for(const auto& s: cservers) {s.second->Forward("", p->username, message);}}}
+        else if (p->stream == 0) { for(const auto& s: cservers) {
+          if(server_status[s.first]) {s.second->Forward("", p->username, message);}}}
         // std::cout <<"Forward completed!"<<std::endl;
         //For each of the current user's followers, put the message in their following.txt file
         if(isLeader) 
@@ -540,7 +576,8 @@ class MessengerServiceImpl final : public MessengerServer::Service {
           user_file << fileinput;
         }
       }
-
+      for(const auto& s: cservers) { 
+        if(!server_status[s.first]) continue; s.second->Forward(username, username, message);}
 
     }
     //If the client disconnected from Chat Mode, set connected to false
@@ -551,17 +588,17 @@ class MessengerServiceImpl final : public MessengerServer::Service {
   Status Forward(ServerContext* context,  const SMessage* smessage, Reply * reply) override {
       std::string from = smessage->from();
       std::string username = smessage->username();
+      if(from==username && !isLeader) return Status::OK;
       const Message& message = smessage->msg();
       // std::cout <<"User name: "<< username << std::endl;
       int index = find_user(username);
       // std::cout <<"Index: "<< index << std::endl;
-      if (index != -1 && from !=username) {
+      if (index != -1 && from!=username) {
       if (client_db[index]->stream != 0 && client_db[index]->connected)  {
-            // std::cout << "useranme: " << client_db[index].username << std::endl;
             client_db[index]->stream->Write(message);
         }
       }
-      if (from.size() !=0 && isLeader) {
+      if (from.size()!=0 && isLeader) {
           int client_index = find_user(from);
           auto c = client_db[client_index];
           std::string filename = from+".txt";
@@ -596,6 +633,7 @@ void initlizedServers() {
         if (i >= 4 && i <=6) hostname = machine2;
         else if (i>6) hostname = machine3; 
         std::string address = hostname+":"+ports[i];
+        // std::cout <<"address: " << address <<std::endl;
         std::shared_ptr<ServerClient> messenger = std::make_shared<ServerClient>(grpc::CreateChannel(
         address, grpc::InsecureChannelCredentials())); 
         std::shared_ptr<ServerChatClient> messenger2 = std::make_shared<ServerChatClient>(grpc::CreateChannel(
@@ -603,6 +641,7 @@ void initlizedServers() {
         messenger->DataSync();
         sservers[address] = messenger;
         cservers[address] = messenger2;
+        server_status[address] = true;
         // }
     }
     if (isMaster) {
@@ -684,6 +723,7 @@ void* restart(void* data) {
   if(system(cmd.c_str()) == -1){
     std::cerr << "Error: Could not start new process" << '\n';
   }
+  sleep(1);
   return 0;
 
 }
@@ -699,10 +739,7 @@ void* heartBeatMonitor(void* invalid) {
                     if (!primary->ShakeHand("")) {isLeader = true;}
                     else isLeader = false;
                 } else { isLeader = false;}
-      }
-
-      if (isMaster && isLeader) {
-	    
+      }else if (isMaster && isLeader) {
             if(!startflag) {std::cout<<"Servers are initializing, please wait........"<<std::endl;}
             for (auto& item : sservers) {
                 auto& key = item.first;
@@ -716,18 +753,78 @@ void* heartBeatMonitor(void* invalid) {
                           std::cout<<"Have lost the connection!"<<std::endl;
                           if (pd.getServiceID(pot) < 4) { //service is local
                           		pthread_create(&startNewServer_tid, NULL, &restart, (void*)addr);
+                              sleep(1);
                           }
                           std::string address = key;
                           std::shared_ptr<ServerClient> messenger = std::make_shared<ServerClient>(grpc::CreateChannel(
                           address, grpc::InsecureChannelCredentials())); 
-                         if (messenger->ShakeHand(myname)) { sservers[key] = messenger;}
+                         if (messenger->ShakeHand(myname)) { sservers[key] = messenger; server_status[key] = true;}
+                         else {server_status[key] = false;}
                      }
                 }
-                sleep(1);
+                sleep(2);
             }
-	    count += 1;
+            //update server status
+            for (auto& item : sservers) {
+                  auto& key = item.first;
+                  if (item.second->ShakeHand(myname)) { item.second->PassStatus();}
+                  sleep(1);
+            }
             startflag = true;
-      } 
+      } else if (!isMaster && isLeader) {
+            //restasrt non leaders on server2 and server3
+            //hardcoded recovery
+            if (server_id == 4) {
+                  // std::string key  = machine2+":"+ports[4];
+                  for (int i = 5; i <=6; i++) {
+                    std::string key1 = machine2+":"+ports[i];
+                    if(!sservers[key1]->ShakeHand("")) {
+                        std::cout<<"Have lost the connection: "<<key1<<std::endl;
+                        std::string* addr = new std::string(key1);
+                        pthread_create(&startNewServer_tid, NULL, &restart, (void*)addr);
+                        sleep(2);
+                        std::shared_ptr<ServerClient> messenger = std::make_shared<ServerClient>(grpc::CreateChannel(
+                        key1, grpc::InsecureChannelCredentials())); 
+                        if (messenger->ShakeHand(key1)) { sservers[key1] = messenger;}
+                    }
+                    sleep(1);
+                }
+
+            } else if (server_id == 7) {
+                  // std::string key  = machine3+":"+ports[7];
+                  for (int i = 8; i <=9; i++) {
+                    std::string key1 = machine3+":"+ports[i];
+                    if(!sservers[key1]->ShakeHand("")) {
+                        std::cout<<"Have lost the connection: "<<key1<<std::endl;
+                        std::string* addr = new std::string(key1);
+                        pthread_create(&startNewServer_tid, NULL, &restart, (void*)addr);
+                        sleep(2);
+                        std::shared_ptr<ServerClient> messenger = std::make_shared<ServerClient>(grpc::CreateChannel(
+                        key1, grpc::InsecureChannelCredentials())); 
+                        if (messenger->ShakeHand(key1)) { sservers[key1] = messenger;}
+                    }
+                    sleep(1);
+                }
+
+            }
+       } else if (server_id == 5 || server_id == 8) {
+        //restart leaders
+          std::string key1 = machine2+":"+ports[4];
+          if (server_id == 8) key1 = machine3+":"+ports[7];
+          if(!sservers[key1]->ShakeHand("")) {
+              std::string* addr = new std::string(key1);
+              pthread_create(&startNewServer_tid, NULL, &restart, (void*)addr);
+              sleep(5);
+              std::shared_ptr<ServerClient> messenger = std::make_shared<ServerClient>(grpc::CreateChannel(
+              key1, grpc::InsecureChannelCredentials())); 
+              if (messenger->ShakeHand(key1)) { sservers[key1] = messenger;}
+          }
+          // for(auto& item : server_status) {
+          //     std::cout << item.first << ": " << item.second << std::endl;
+          // }
+          sleep(1);
+    }
+    ccount += 1; 
     }
 }
 

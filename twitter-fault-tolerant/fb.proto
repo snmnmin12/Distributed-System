@@ -38,6 +38,7 @@ service ServerComm {
   rpc ShakeHand(Reply) returns (Reply) {}
   rpc ID(Reply) returns (Reply) {}
   rpc DataSync(Reply) returns (Data){}
+  rpc PassStatus(Stat)  returns (Reply){}
 }
 
 // The messenger service definition.
@@ -53,6 +54,16 @@ service MessengerServer {
   rpc Forward(SMessage) returns(Reply){}
 }
 
+//the Status of all machines 
+message Stat {
+  message StatData { 
+    string addr = 1;
+    bool    on = 2;    
+  } 
+  repeated StatData statdata = 1;
+}
+
+//The Data structure for holding following information
 message Data {
   message ClientData {
     string username = 1;

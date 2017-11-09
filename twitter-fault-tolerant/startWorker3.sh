@@ -1,10 +1,12 @@
-#terminal='gnome-terminal -e'
-#property='--window-with-profile=NAMEOFTHEPROFILE'
-./fbsd -s localhost -l -i 7 &
+host1="lenss-comp1.cse.tamu.edu"
+host2="lenss-comp3.cse.tamu.edu"
+host3="lenss-comp4.cse.tamu.edu"
+
+./fbsd -z ${host3} -y ${host2} -x ${host1} -l -i 7 &
 export pid1=$!
-./fbsd -s localhost -i 8 &
+./fbsd -z ${host3} -y ${host2} -x ${host1} -i 8 &
 export pid2=$!
-./fbsd -s localhost -i 9 &
+./fbsd -z ${host3} -y ${host2} -x ${host1} -i 9 &
 export pid3=$!
 
 echo "__________________"

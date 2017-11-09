@@ -1,17 +1,17 @@
 #master node and replica node on master server
-3000
-3010
+3123
+3124
 
 #worker on master server
-3011
-3012
+3223
+3224
 
 #server1
-#3020
-#3021
-#3022
+3323
+3324
+3325
 
 #server2
-#3030
-#3031
-#3032
+3433
+3434
+3435

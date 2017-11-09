@@ -12,6 +12,7 @@ class ParameterReader
 public:
     ParameterReader(std::string filename="./config" )
     {
+        int i = 0;
         std::ifstream fin( filename.c_str() );
         if (!fin)
         {
@@ -24,6 +25,7 @@ public:
             std::getline( fin, str );
             if (str[0] == '#' || str.empty())  continue;
             data.push_back(str);
+            map[str] = i++;
             // int pos = str.find("=");
             // if (pos == -1) continue;
             // std::string key = str.substr( 0, pos );
@@ -57,7 +59,12 @@ public:
         return data;
     }
 
+    int getServiceID(std::string str) {
+        return map[str];
+    }
+
 private:
     // std::map<std::string, std::string> data;
     std::vector<std::string> data;
+    std::map<std::string, int> map;
 };

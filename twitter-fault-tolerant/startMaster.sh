@@ -1,12 +1,15 @@
-#terminal='gnome-terminal -e'
-#property='--window-with-profile=NAMEOFTHEPROFILE'
-./fbsd -s localhost -m -i 0 &
+#host1 where master node located
+host1="lenss-comp1.cse.tamu.edu"
+host2="lenss-comp3.cse.tamu.edu"
+host3="lenss-comp4.cse.tamu.edu"
+
+./fbsd -z ${host3} -y ${host2} -x ${host1} -m -l -i 0 &
 export pid1=$!
-./fbsd -s localhost -l -i 1 &
+./fbsd -z ${host3} -y ${host2} -x ${host1} -m -i 1 &
 export pid2=$!
-./fbsd -s localhost -i 2 &
+./fbsd -z ${host3} -y ${host2} -x ${host1} -l -i 2 &
 export pid3=$!
-./fbsd -s localhost -i 3 &
+./fbsd -z ${host3} -y ${host2} -x ${host1} -i 3 &
 export pid4=$!
 
 echo "__________________"
@@ -23,7 +26,3 @@ kill $pid1
 kill $pid2
 kill $pid3
 kill $pid4
-
-#./fbc -s server1 -u user1 
-#./fbc -s server1 -u user2"
-# ${terminal} -e "./fbc -s server1 -u user3" ${property} 

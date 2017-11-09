@@ -199,6 +199,9 @@ class MessengerClient {
 
   //Calls the Chat stub function which uses a bidirectional RPC to communicate
   bool Chat (const std::string& username, std::string restart = "") {
+
+    if(!ShakeHand()) {resetServer();}
+
     ClientContext context;
     Reply request, reply;
     request.set_msg("hi");
@@ -213,7 +216,7 @@ class MessengerClient {
       Reply request, reply;
       request.set_msg("hi");
       // std::cout << "cached is: "<< cached << std::endl;
-      if (cached == "") { cached = "Set Stream"; std::cout << "Enter chat messages: \n";} 
+      if (cached == "") { cached = "Set Stream"; std::cout << "Enter chat messages: \n";}
       Message m = MakeMessage(username, cached);
       stream->Write(m);
       //while(!flag && getline(std::cin, cached)){
@@ -240,12 +243,11 @@ class MessengerClient {
     //Wait for the threads to finish
     writer.join();
     reader.join();
-    if(resetServer()) {Chat(username, "Continued");}
+    if(resetServer()) {Chat(username,"$continued");}
     return false;
   }
 
   bool resetServer() {  
-	std::cout <<"Ready to reset server!" <<std::endl;
         std::vector<std::string> ports = pd.getData();
         for (int i = 0; i < 2; i++) {
               std::string port = ports[i];
@@ -319,7 +321,6 @@ int main(int argc, char** argv) {
   // localhost at port 50051). We indicate that the channel isn't authenticated
   // (use of InsecureChannelCredentials()).
   std::cin.sync_with_stdio(false);
-  std::string server_add = "0.0.0.0";
   std::string username = "default";
   std::string port = "3123";
   // std::string port = "3010";
